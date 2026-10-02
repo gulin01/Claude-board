@@ -1,0 +1,31 @@
+{
+  "projects": {
+    "~/Desktop/my-work-project": "work",
+    "~/Desktop/my-side-project": "personal"
+  },
+  "personal_notify_hours": {
+    "from": "20:00",
+    "to": "08:00"
+  },
+  "sound": "Glass",
+  "stale_after_hours": 24,
+  "browser": "com.google.Chrome",
+  "fresh_days": 2,
+  "context_warn_k": 250,
+  "claude_accounts": [
+    "you@company.com"
+  ],
+  "chrome_profiles": {
+    "Profile 1": "work",
+    "Default": "personal"
+  },
+  "account_spaces": {
+    "you@company.com": "work"
+  },
+  "claude_in_chrome": {
+    "Default": {
+      "space": "personal",
+      "claude_email": "optional: the Claude login used in that Chrome profile"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+# Private, machine-specific data: session logs in the trash, events, usage, notification log
+data/
+# Your own settings (project folders, emails); copy config.example.json to start
+config.json
+# Build output (rebuild with notifier/build.sh)
+notifier/Agent Board.app/
+notifier/build/
+__pycache__/
+*.pyc
+.DS_Store
+.claude/
+menubar/Agent Board Menu.app/
