@@ -274,7 +274,7 @@ details.more[open] summary::after{content:"−"}
 .seg button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .trow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:9px 10px;border:1px solid var(--line);border-radius:12px;cursor:pointer;min-width:0}
 .trow:hover{border-color:var(--accent)}
-.trow.live{border-left:4px solid var(--work)}
+.trow.agent-live{border-left:4px solid var(--work)}
 .fav{flex:none;width:28px;height:28px;border-radius:8px;background:var(--soft);display:grid;place-items:center;font:700 12px/1 var(--mono);color:var(--muted);text-transform:uppercase}
 .trow .tt{flex:1 1 180px;min-width:0}
 .trow .tt b{display:block;font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -827,7 +827,7 @@ function tabsSheet(){
   return `<div class="seg">${[["live",t("active")],["claude",t("claude")],["all",t("all")]].map(([k, l]) => `<button class="${tabScope === k ? "on" : ""}" data-scope="${k}">${l} ${n[k]}</button>`).join("")}</div>
     ${profs.length > 1 ? `<div class="seg"><button class="${!tabProfile ? "on" : ""}" data-prof="">${t("all_accounts")}</button>${profs.map(p => `<button class="${tabProfile === p.profile ? "on" : ""}" data-prof="${esc(p.profile)}" title="${esc(p.profile_email)}">${esc(p.profile_name)}</button>`).join("")}</div>` : ""}
     <input class="search" id="tabQ" type="search" placeholder="${t("find_tab")}" value="${esc(q)}" style="width:100%;display:block">
-    <div class="list">${list.map(t => `<div class="trow ${t.live ? "live" : ""}" data-w="${t.window}" data-t="${t.tab}" title="${esc(t.url)}">
+    <div class="list">${list.map(t => `<div class="trow ${t.live ? "agent-live" : ""}" data-w="${t.window}" data-t="${t.tab}" title="${esc(t.url)}">
         <span class="fav" style="${t.profile_email ? `background:${colorOf(t.profile_email)};color:#fff` : ""}">${esc((host(t.url) || "?")[0])}</span>
         <span class="tt"><b>${esc(t.title || t.url)}</b><small>${esc(host(t.url))}${t.profile_email ? " · " + esc(t.profile_email) : ""}</small></span>
         ${t.claude ? `<span class="tag">${esc(t.claude)}</span>` : ""}${(t.agents || []).slice(0, 1).map(a => `<span class="tag">${a.live ? "● " : ""}${esc(a.title)}</span>`).join("")}
