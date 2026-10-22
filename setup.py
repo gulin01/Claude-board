@@ -7,6 +7,10 @@
     python3 setup.py --dry-run    # show what would happen, change nothing
     python3 setup.py --uninstall  # remove hooks, login items and the Desktop shortcut (keeps your data)
 
+For Claude (or scripts): no typed questions needed.
+    python3 setup.py --detect               # prints JSON: OS, what's installed, projects, Chrome profiles, account
+    python3 setup.py --answers answers.json # installs with these answers (format: see CLAUDE.md)
+
 What it asks:
   1. Your personal hours (personal notifications only arrive then; the board switches to Personal then)
   2. Which of your Claude Code project folders are Work and which are Personal
@@ -228,6 +232,65 @@ def configure():
     return cfg
 
 
+def detect():
+    """Everything Claude needs to ask the user the setup questions, as JSON."""
+    try:
+        with open(CONFIG, encoding="utf-8") as fh:
+            current = json.load(fh)
+    except (OSError, ValueError):
+        current = {}
+    chrome = os.path.exists(CHROME_STATE)
+    print(json.dumps({
+        "os": "windows" if WINDOWS else "macos",
+        "python": sys.version.split()[0],
+        "project_folder": HERE,
+        "settings_folder": AGENT_HOME,
+        "claude_code_installed": os.path.isdir(CLAUDE_DIR),
+        "claude_account": claude_code_account(),
+        "xcode_tools": bool(shutil.which("swiftc")) if not WINDOWS else None,
+        "chrome_installed": chrome,
+        "projects": project_folders(),
+        "chrome_profiles": [{"dir": d, "name": n, "email": e} for d, (n, e) in chrome_profiles().items()],
+        "current_answers": {k: current.get(k) for k in ("personal_notify_hours", "projects", "chrome_profiles",
+                                                        "claude_in_chrome", "account_spaces") if k in current},
+    }, indent=2, ensure_ascii=False))
+
+
+def configure_from(path):
+    """Non-interactive version of configure(), from a JSON file of answers."""
+    with open(path, encoding="utf-8") as fh:
+        a = json.load(fh)
+    cfg = {}
+    for p in (EXAMPLE, CONFIG):
+        try:
+            with open(p, encoding="utf-8") as fh:
+                cfg.update(json.load(fh))
+        except (OSError, ValueError):
+            pass
+    if not os.path.exists(CONFIG):
+        cfg.update(projects={}, chrome_profiles={}, account_spaces={}, claude_accounts=[], claude_in_chrome={})
+    def space(v):
+        if v not in ("work", "personal"):
+            raise SystemExit(f"Answer must be 'work' or 'personal', got {v!r}")
+        return v
+    if "personal_hours" in a:
+        cfg["personal_notify_hours"] = {"from": a["personal_hours"]["from"], "to": a["personal_hours"]["to"]}
+    if "projects" in a:
+        cfg["projects"] = {tilde(os.path.expanduser(k)): space(v) for k, v in a["projects"].items()}
+    if "chrome_profiles" in a:
+        cfg["chrome_profiles"] = {d: space(v) for d, v in a["chrome_profiles"].items()}
+    if "claude_in_chrome" in a:
+        cp = cfg.get("chrome_profiles") or {}
+        cfg["claude_in_chrome"] = {d: {"space": cp.get(d, "personal"), "claude_email": ""} for d in a["claude_in_chrome"]}
+    acct = claude_code_account()
+    if acct and "claude_account_space" in a:
+        cfg.setdefault("account_spaces", {})[acct] = space(a["claude_account_space"])
+        cfg["claude_accounts"] = [acct] + [x for x in cfg.get("claude_accounts", []) if x != acct and "@" in x]
+    write(CONFIG, json.dumps(cfg, indent=2, ensure_ascii=False) + "\n")
+    ok(f"Saved answers in {tilde(CONFIG)}")
+    return cfg
+
+
 # ---------------------------------------------------------------- install
 # Runs a hook script if it still exists and always exits 0, so a moved or deleted folder never blocks Claude.
 WIN_RUNNER = "import os,runpy,sys; p=sys.argv[1]; sys.argv=[p]; os.path.exists(p) and runpy.run_path(p, run_name='__main__')"
@@ -438,11 +501,18 @@ def main():
         sys.exit("Please use Python 3.9 or newer.")
     if "--uninstall" in sys.argv:
         return uninstall()
+    if "--detect" in sys.argv:
+        return detect()
     say(f"\n{B}Agent Board setup{X}  {D}{'(dry run: nothing will change)' if DRY else ''}{X}")
     say(f"{D}A few questions, then everything installs. Press Enter to accept the [default].{X}")
     if not os.path.isdir(CLAUDE_DIR):
         warn(f"Claude Code doesn't seem to be installed yet (no {tilde(CLAUDE_DIR)}). Install it first, then run setup again.")
-    configure()
+    if "--answers" in sys.argv:
+        global YES
+        YES = True
+        configure_from(sys.argv[sys.argv.index("--answers") + 1])
+    else:
+        configure()
     install_hooks()
     built = build_apps()
     login_items(built)
