@@ -147,7 +147,15 @@ main{padding-block:18px 60px}
 .tile.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),var(--shadow)}
 .tile .stage{height:58px;display:grid;place-items:end center;width:100%}
 .tname{font:700 14px/1.2 var(--display);width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:2.4em;word-break:break-word}
-.tproj{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);max-width:100%;overflow:hidden;white-space:nowrap}
+.kinds{display:flex;gap:8px;margin-top:16px}
+.kinds button{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:11px 8px;font:700 15px/1.1 var(--display);color:var(--muted);position:relative;cursor:pointer}
+.kinds button .g{font-size:13px;opacity:.8}
+.kinds button .n{font-size:12px;background:var(--soft);color:var(--ink);border-radius:99px;padding:2px 8px}
+.kinds button.on{color:var(--ink);border-color:var(--accent);box-shadow:var(--shadow)}
+.kinds button .ping{position:absolute;top:7px;right:9px;width:9px;height:9px;border-radius:50%}
+@media (max-width:560px){.kinds{gap:5px}.kinds button{font-size:13px;padding:9px 4px;gap:5px}.kinds button .g{display:none}}
+body.tv .kinds{display:none}
+.tproj{display:flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted);max-width:100%;overflow:hidden;white-space:nowrap}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--c,var(--accent));flex:none}
 .tfoot{display:flex;align-items:center;justify-content:space-between;width:100%;gap:6px;min-height:14px}
 .ago{position:absolute;top:8px;left:10px;font:500 11px/1 var(--mono);color:var(--muted)}
@@ -185,7 +193,10 @@ main{padding-block:18px 60px}
 .scrim.open{opacity:1;pointer-events:auto}
 .dtop{display:flex;align-items:center;gap:14px}
 .dtop .buddy{--s:64px}
-.dtop h3{margin:0;font:800 19px/1.2 var(--display);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dproj{display:flex;align-items:center;gap:8px;font:800 22px/1.15 var(--display);letter-spacing:-.02em;color:var(--ink);word-break:break-word}
+.dproj .dot{width:12px;height:12px}
+.dproj small{font:600 12px/1 var(--body,inherit);color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:3px 8px;white-space:nowrap}
+.dtop h3{margin:4px 0 0;font:600 15px/1.3 var(--display);color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .dtop .tproj{margin-top:5px;white-space:normal}
 .state-line{display:flex;align-items:center;gap:8px;font-weight:600}
 .state-line .sw{width:10px;height:10px;border-radius:50%}
@@ -375,6 +386,7 @@ body.tv .tv-exit{display:flex}
   <label><span class="g">文</span><span data-t="m_lang">Language</span><select id="langSel" style="margin-left:auto"><option value="auto" data-t="lang_auto">Auto</option><option value="en">English</option><option value="ko">한국어</option></select></label>
 </div>
 
+<nav class="wrap kinds" id="kinds" role="tablist" aria-label="Where agents run"></nav>
 <main class="wrap" id="rooms"><div class="empty" data-t="loading">Loading…</div></main>
 
 <div class="river" id="river"><span class="lbl"><i></i><span data-t="live">Live</span></span><div class="track" id="riverTrack"><span class="river-empty" data-t="river_empty">Activity from your agents will flow here.</span></div></div>
@@ -429,6 +441,10 @@ const I18N = {
     n_restart:"{n} to restart",
     chrome_chip:"◎ claude.ai tabs · click to jump", jump_title:"click to jump to this tab",
     sleep_chip:"unused 24h+ · keep or delete", keep:"Keep", del:"Delete", hide:"Hide", hide_title:"Desktop app session: delete it in the app",
+    k_terminal:"Terminal", k_desktop:"Claude Desktop", k_chrome:"Chrome",
+    k_empty_terminal:"No terminal agents here yet. Run claude in a terminal or your editor.",
+    k_empty_desktop:"No Claude Desktop agents yet. Code-tab sessions show up by themselves; chats show up once the connector is set up (README step 6).",
+    k_empty_chrome:"No Chrome agents yet. Open claude.ai or Claude in Chrome; tabs show up here.",
     empty_match:"No agent matches.", empty_none:"No agents yet. Start Claude Code and they'll appear here.",
     open_x:"↗ Open {x}", jump:"⇥ Jump to tab", resume:"›_ Resume", resume_copied:"Resume command copied: paste it in a terminal",
     fresh:"✦ Fresh start", del_btn:"✕ Delete", files:"files", commands:"commands", pages:"pages", helpers:"helpers",
@@ -472,6 +488,10 @@ const I18N = {
     n_restart:"{n}개 새로 시작 필요",
     chrome_chip:"◎ claude.ai 탭 · 눌러서 이동", jump_title:"눌러서 이 탭으로 이동",
     sleep_chip:"24시간+ 미사용 · 유지 또는 삭제", keep:"유지", del:"삭제", hide:"숨기기", hide_title:"데스크톱 앱 세션이에요. 앱에서 삭제하세요",
+    k_terminal:"터미널", k_desktop:"Claude 데스크톱", k_chrome:"Chrome",
+    k_empty_terminal:"아직 터미널 에이전트가 없어요. 터미널이나 에디터에서 claude 를 실행하세요.",
+    k_empty_desktop:"아직 Claude 데스크톱 에이전트가 없어요. Code 탭 세션은 자동으로 보이고, 채팅은 커넥터를 설정하면 보여요 (README 6단계).",
+    k_empty_chrome:"아직 Chrome 에이전트가 없어요. claude.ai 나 Chrome의 Claude를 열면 탭이 여기에 보여요.",
     empty_match:"맞는 에이전트가 없어요.", empty_none:"아직 에이전트가 없어요. Claude Code를 시작하면 여기에 나타나요.",
     open_x:"↗ {x} 열기", jump:"⇥ 탭으로 이동", resume:"›_ 이어서 하기", resume_copied:"이어서 하기 명령을 복사했어요. 터미널에 붙여 넣으세요",
     fresh:"✦ 새로 시작", del_btn:"✕ 삭제", files:"파일", commands:"명령", pages:"페이지", helpers:"도우미",
@@ -661,11 +681,25 @@ function room(key, title, list, extra = ""){
     <div class="grid">${list.map(tile).join("")}</div>
   </section>`;
 }
+// ---------- Kinds: where agents run (Terminal / Claude Desktop / Chrome), one tab each ----------
+const KINDS = {terminal: ">_", desktop: "▢", chrome: "◎"};
+let kind = "terminal";
+try { if (KINDS[localStorage.getItem("ab-kind")]) kind = localStorage.getItem("ab-kind"); } catch {}
+function kindOf(s){ return s.source === "Desktop app" || s.source === "Claude Desktop" ? "desktop" : s.kind === "external" ? "chrome" : "terminal"; }
+function setKind(k){ kind = k; try { localStorage.setItem("ab-kind", k); } catch {} renderRooms(); }
+function renderKinds(every, tabsN){
+  $("#kinds").innerHTML = Object.entries(KINDS).map(([k, g]) => {
+    const list = every.filter(s => kindOf(s) === k && !s.stale), need = list.some(s => mood(s) === "need");
+    return `<button role="tab" data-kind="${k}" class="${k === kind ? "on" : ""}" aria-selected="${k === kind}"><span class="g">${g}</span>${t("k_" + k)}<span class="n">${list.length + (k === "chrome" ? tabsN : 0)}</span>${need ? `<span class="ping" style="background:${MOOD.need.color}"></span>` : ""}</button>`;
+  }).join("");
+}
 let tileCache = new Map();
 function renderRooms(){
-  const all = shown().filter(matches);
+  const every = shown().filter(matches);
+  const all = every.filter(s => kindOf(s) === kind);
   const awake = all.filter(s => !s.stale), asleep = all.filter(s => s.stale);
-  const claudeTabs = (tabsData || []).filter(t => t.claude);
+  const claudeTabs = kind === "chrome" ? (tabsData || []).filter(t => t.claude) : [];
+  renderKinds(every, (tabsData || []).filter(t => t.claude).length);
   // One room per project, the most recently active project first.
   const latest = {};
   awake.forEach(s => { latest[s.project] = Math.max(latest[s.project] || 0, s.last_activity); });
@@ -679,7 +713,7 @@ function renderRooms(){
       <button class="mini-btn" data-act="keep" data-id="${esc(s.id)}">${t("keep")}</button>
       ${s.deletable ? `<button class="mini-btn del" data-act="delete" data-id="${esc(s.id)}">${t("del")}</button>` : `<button class="mini-btn" data-act="hide" data-id="${esc(s.id)}" title="${t("hide_title")}">${t("hide")}</button>`}
     </div>`).join("")}</div></div></section>`;
-  if (!html) html = `<div class="empty">${buddy("rest", "var(--b3)", {size: 70})}${$("#q").value ? t("empty_match") : t("empty_none")}</div>`;
+  if (!html) html = `<div class="empty">${buddy("rest", "var(--b3)", {size: 70})}${$("#q").value ? t("empty_match") : t("k_empty_" + kind)}</div>`;
   // Reuse unchanged tiles so their animations don't restart on every refresh.
   const y = scrollY, prev = new Map([...document.querySelectorAll(".tile[data-open]")].map(el => [el.dataset.open, el]));
   $("#rooms").innerHTML = html;
@@ -710,7 +744,8 @@ function agentSheet(s){
   const tl = s.timeline.slice().reverse();
   return `
     <div class="dtop">${buddy(m, colorOf(s.project), {size: 64, where: whereOf(s), kinds: s.timeline.map(t => t.kind)})}
-      <div style="min-width:0"><h3>${esc(s.title)}</h3><div class="tproj"><span class="dot" style="--c:${colorOf(s.project)}"></span>${esc(s.project)}${s.branch ? ` · ${esc(s.branch)}` : ""}</div></div></div>
+      <div style="min-width:0"><div class="dproj"><span class="dot" style="--c:${colorOf(s.project)}"></span>${esc(s.project)}<small>${whereOf(s)} ${t("k_" + kindOf(s))}</small></div>
+        <h3>${esc(s.title)}${s.branch ? ` · ${esc(s.branch)}` : ""}</h3></div></div>
     <div class="state-line"><span class="sw" style="background:${MOOD[m].color}"></span>${MOOD[m].label}<small>· ${t("ago", {t: ago(s.last_activity)})}</small></div>
     <div class="icons">
       <div class="ic"><span class="g">✎</span><b>${projFiles.length}</b><small>${t("files")}</small></div>
@@ -952,6 +987,7 @@ function animateChanges(){
 // One click handler for the whole page.
 document.addEventListener("click", async e => {
   const tgt = e.target;
+  const kb = tgt.closest("[data-kind]"); if (kb) return setKind(kb.dataset.kind);
   if (!tgt.closest("#menu,#moreBtn")) $("#menu").hidden = true;
   const link = tgt.closest("a.open-link");
   if (link && !e.metaKey && !e.ctrlKey) { e.preventDefault();
@@ -1040,6 +1076,7 @@ function applyHash(){
   if (m[1] === "idle") { $("#sleep")?.scrollIntoView({block: "start"}); return; }
   const id = decodeURIComponent(m[2]), s = data.find(x => x.id === id);
   if (!s) { toast(t("gone")); return; }
+  if (kindOf(s) !== kind) setKind(kindOf(s));
   if (s.is_scratch) $("#scratch").checked = true;
   openSheet("agent", id);
 }
