@@ -16,7 +16,7 @@ What it asks:
   2. Which of your Claude Code project folders are Work and which are Personal
   3. Which Chrome profiles (Google accounts) are Work and which are Personal
   4. Which Claude accounts are Work and which are Personal
-What it installs:
+What it installs (and, for the Chrome tab finder, walks you through 3 clicks in Chrome):
   - Claude Code hooks + status line in ~/.claude/settings.json (a backup is saved next to it)
   - Mac: the Agent Board app (board window + notifications) and the menu-bar buddy, if Xcode tools exist
   - start at login (Mac: login items · Windows: Startup folder)
@@ -46,6 +46,8 @@ CHROME_STATE = (os.path.join(os.environ.get("LOCALAPPDATA", ""), "Google", "Chro
                 else os.path.join(HOME, "Library", "Application Support", "Google", "Chrome", "Local State"))
 WIN_STARTUP = os.path.join(os.environ.get("APPDATA", ""), "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "Agent Board.vbs")
 HOOK_SCRIPTS = ("notify_hook.py", "session_start_hook.py", "statusline.py")
+EXTENSION_DIR = os.path.join(HERE, "extension")
+TRAY = os.path.join(HERE, "tray", "tray.ps1")
 NOTIFIER_APP = os.path.join(HERE, "notifier", "Agent Board.app")
 MENU_APP = os.path.join(HERE, "menubar", "Agent Board Menu.app")
 DESKTOP_LINK = os.path.join(HOME, "Desktop", "Agent Board.app")
@@ -249,6 +251,8 @@ def detect():
         "claude_account": claude_code_account(),
         "xcode_tools": bool(shutil.which("swiftc")) if not WINDOWS else None,
         "chrome_installed": chrome,
+        "chrome_extension_folder": EXTENSION_DIR,
+        "chrome_extension_steps": [s.format(folder=EXTENSION_DIR) for s in EXTENSION_STEPS],
         "projects": project_folders(),
         "chrome_profiles": [{"dir": d, "name": n, "email": e} for d, (n, e) in chrome_profiles().items()],
         "current_answers": {k: current.get(k) for k in ("personal_notify_hours", "projects", "chrome_profiles",
@@ -398,15 +402,19 @@ def pythonw():
 def windows_startup():
     """Startup-folder script that runs the board server hidden at login; also starts it now."""
     server = os.path.join(HERE, "server.py")
+    tray = ["powershell", "-NoProfile", "-STA", "-WindowStyle", "Hidden", "-ExecutionPolicy", "Bypass", "-File", TRAY]
     vbs = (f'Set sh = CreateObject("WScript.Shell")\r\n'
            f'sh.CurrentDirectory = "{HERE}"\r\n'
-           f'sh.Run """{pythonw()}"" -X utf8 ""{server}""", 0, False\r\n')
+           f'sh.Run """{pythonw()}"" -X utf8 ""{server}""", 0, False\r\n'
+           f'WScript.Sleep 3000\r\n'
+           f'sh.Run "powershell -NoProfile -STA -WindowStyle Hidden -ExecutionPolicy Bypass -File ""{TRAY}""", 0, False\r\n')
     write(WIN_STARTUP, vbs)
-    ok("Board server starts when you sign in to Windows")
+    ok("Board server and tray buddy start when you sign in to Windows")
     if not DRY:
         flags = getattr(subprocess, "DETACHED_PROCESS", 0) | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0) | getattr(subprocess, "CREATE_NO_WINDOW", 0)
         subprocess.Popen([pythonw(), "-X", "utf8", server], cwd=HERE, creationflags=flags, close_fds=True)
-        ok("Board server started")
+        subprocess.Popen(tray, cwd=HERE, creationflags=flags, close_fds=True)
+        ok("Board server and tray buddy started (tray: bottom-right, next to the clock)")
 
 
 def login_items(apps_built):
@@ -459,6 +467,37 @@ def shortcut():
     ok("Added “Agent Board” to your Desktop")
 
 
+EXTENSION_STEPS = [
+    "In Chrome, open  chrome://extensions",
+    "Turn on  Developer mode  (top-right switch)",
+    "Click  Load unpacked  and choose this folder:  {folder}",
+    "Repeat in each Chrome profile you use (each Google account has its own extensions)",
+]
+
+
+def chrome_extension(interactive=True):
+    step(8, "Chrome tab finder (optional, 3 clicks)")
+    say(f"   {D}Lets the board find and switch to your Chrome tabs. It only talks to this computer.{X}")
+    if not os.path.exists(CHROME_STATE):
+        warn("Google Chrome not found, skipping.")
+        return
+    for i, s in enumerate(EXTENSION_STEPS, 1):
+        say(f"   {i}. {s.format(folder=EXTENSION_DIR)}")
+    if not interactive or DRY:
+        return
+    if not ask("Open Chrome's extensions page and the folder now? (y/n)", "y").lower().startswith("y"):
+        return
+    if WINDOWS:
+        exe = windows_browser()
+        if exe and "chrome" in exe.lower():
+            subprocess.Popen([exe, "chrome://extensions"])
+        subprocess.Popen(["explorer", EXTENSION_DIR])
+    else:
+        subprocess.run(["open", "-a", "Google Chrome", "chrome://extensions"], check=False)
+        subprocess.run(["open", EXTENSION_DIR], check=False)
+    ok("Opened. When it's loaded, the board's Tabs button shows your tabs.")
+
+
 def uninstall():
     say(f"{B}Removing Agent Board from Claude Code and login items{X} {D}(your data and config stay){X}")
     try:
@@ -478,10 +517,12 @@ def uninstall():
         if os.path.exists(WIN_STARTUP) and not DRY:
             os.remove(WIN_STARTUP)
         server = os.path.join(HERE, "server.py").replace("'", "''")
+        tray = TRAY.replace("'", "''")
         run(["powershell", "-NoProfile", "-Command",
              "$d=[Environment]::GetFolderPath('Desktop'); Remove-Item (Join-Path $d 'Agent Board.lnk') -ErrorAction SilentlyContinue; "
-             f"Get-CimInstance Win32_Process | Where-Object {{ $_.CommandLine -like '*{server}*' }} | ForEach-Object {{ Stop-Process -Id $_.ProcessId }}"], check=False)
-        ok("Startup item, Desktop shortcut and running board removed")
+             f"Get-CimInstance Win32_Process | Where-Object {{ $_.CommandLine -like '*{server}*' -or $_.CommandLine -like '*{tray}*' }} | ForEach-Object {{ Stop-Process -Id $_.ProcessId }}"], check=False)
+        ok("Startup item, Desktop shortcut, board and tray buddy removed")
+        say(f"   {D}Chrome extension: remove “Agent Board Tabs” in chrome://extensions if you added it.{X}")
         return
     for label in ("com.agent-board.server", "com.agent-board.menubar"):
         run(["launchctl", "bootout", f"gui/{os.getuid()}/{label}"], check=False)
@@ -517,6 +558,7 @@ def main():
     built = build_apps()
     login_items(built)
     shortcut()
+    chrome_extension(interactive="--answers" not in sys.argv and not YES)
     say(f"\n{G}{B}Done.{X} Open {B}Agent Board{X} on your Desktop, or {BOARD}")
     if WINDOWS:
         say(f"{D}Notifications show up from Windows PowerShell; turn them on in Settings → System → Notifications if needed.")

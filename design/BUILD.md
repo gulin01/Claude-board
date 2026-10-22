@@ -38,9 +38,9 @@ work through the first unchecked item. Commit after each checked item.
 - [x] Server: WebSocket bridge for the Chrome extension (/ws/tabs), pinned extension id only
 - [x] Chrome extension: reports tabs per profile, switches/opens tabs on request (works on Mac too)
 - [x] chrome.py uses extension data when fresh; AppleScript stays as the Mac fallback
-- [ ] Windows tray buddy (PowerShell, no installs): mood icon, list, space switch, open board
-- [ ] setup.py: start tray at sign-in, open chrome://extensions + folder; README steps
-- [ ] Test (Mac + simulated), commit, push
+- [x] Windows tray buddy (PowerShell, no installs): mood icon, list, space switch, open board
+- [x] setup.py: start tray at sign-in, open chrome://extensions + folder; README steps
+- [x] Test (Mac + simulated), commit, push
 
 ## Step 4 · Product
 - [ ] One-click setup, settings screen, EN / 한국어 / O'zbek, Mac app

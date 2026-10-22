@@ -7,6 +7,14 @@ should be restarted. Work and personal projects are kept apart, so coworkers nev
 Runs **only on your computer**. Nothing is sent anywhere. Works on **macOS** and **Windows**
 (see [Windows](#windows) for what's different there).
 
+> **Easiest: let Claude do it.** Clone the repository, open Claude Code in the folder and say
+> *"set up Agent Board for me"*. Claude reads [CLAUDE.md](CLAUDE.md), asks you the questions and installs it.
+
+## Where your information is kept
+This folder holds **code only**. Your answers (project folders, accounts, hours) and data (logs, trash, usage)
+live in a separate private folder: **macOS** `~/.agent-board/` · **Windows** `C:\Users\<you>\.agent-board\`.
+Nothing is ever sent off your computer, and nothing personal ends up in this folder.
+
 ## Start here: setup in 5 minutes
 
 ### 1. Check you have these
@@ -43,11 +51,20 @@ the **Agent Board** app, the menu-bar buddy, start-at-login, and a shortcut on y
   Agent Board → **Persistent**, so they stay until you close them.
 - **“python3 wants to control Google Chrome”** → **OK** (only for finding your Chrome tabs; it never reads pages).
 
-### 5. Restart Claude Code
+### 5. Optional: the Chrome tab finder (3 clicks per Chrome profile)
+Lets the board find your open Chrome tabs and jump to them. Setup opens the right page and folder for you:
+1. In Chrome, open `chrome://extensions`
+2. Turn on **Developer mode** (top-right)
+3. Click **Load unpacked** and choose the **`extension`** folder inside this project
+
+Do this once in each Chrome profile you use (each Google account has its own extensions). On macOS the tab
+finder also works without the extension.
+
+### 6. Restart Claude Code
 Close and reopen any running Claude Code sessions so they pick up the new hooks. That's it: open
 **Agent Board** on your Desktop. Your agents appear as soon as you use Claude Code.
 
-> Change your answers later: run `python3 setup.py` again (or edit `config.json`).
+> Change your answers later: run `python3 setup.py` again (or edit `~/.agent-board/config.json`).
 > Preview without changing anything: `python3 setup.py --dry-run`.
 
 ### Work vs personal, in short
@@ -87,9 +104,11 @@ Same board, characters, Work/Personal spaces, usage and longevity. Setup is the 
 | Notifications (click opens the agent) | ✅ Agent Board app | ✅ Windows notifications (shown as *Windows PowerShell*) |
 | Starts at login | ✅ login items | ✅ Startup folder |
 | Desktop icon | ✅ Mac app window | ✅ Chrome/Edge app window |
-| Chrome tab finder, menu-bar buddy, TV-mode app window | ✅ | ⏳ not yet (the board's TV mode works in the browser) |
+| Buddy next to the clock | ✅ menu bar | ✅ taskbar tray (bottom-right) |
+| Chrome tab finder | ✅ with or without the extension | ✅ with the Chrome extension (step 5) |
 
 Notifications not showing? Settings → System → Notifications → turn on **Windows PowerShell**.
+Tray buddy hidden? Click the **^** arrow next to the clock and drag the buddy onto the taskbar.
 Remove it with `py setup.py --uninstall`.
 
 ### Every day
@@ -118,6 +137,9 @@ python3 setup.py --uninstall     # removes hooks, login items and the Desktop sh
 ---
 
 # Reference
+
+In this section `config.json` and `data/` mean the files in your private settings folder
+(`~/.agent-board/`, Windows `%USERPROFILE%\.agent-board\`), not this project folder.
 
 ## Where the data comes from
 - **Claude Code sessions (automatic):** the CLI, the desktop app's Code tab and IDE sessions all write
