@@ -72,7 +72,10 @@ Use `python3` on macOS and `py` on Windows (if `py` is missing, try `python`).
    - Allow the notification prompt (macOS: from "Agent Board"; Windows: from "Windows PowerShell").
    - macOS: allow "python3 wants to control Google Chrome" if asked (tab finder without the extension).
    - **Restart running Claude Code sessions** so they load the hooks.
-   - If the connector was added: **restart Claude Desktop**, and choose **Always allow** the first time Claude uses it.
+   - If the connector was added: **restart Claude Desktop**; paste the reporting instructions into Claude Desktop →
+     **Settings → Account → Instructions for Claude** (the text is in README step 6, Korean in README.ko.md);
+     start a **new** chat, make sure **Agent Board** is on in the tools menu, and choose **Always allow** the first
+     time Claude uses it.
    - Open **Agent Board** on the Desktop.
 7. **Offer the Chrome tab finder** (optional): read out `chrome_extension_steps` from `--detect`.
    You cannot install a Chrome extension yourself; the user clicks through `chrome://extensions` →
