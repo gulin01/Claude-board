@@ -30,7 +30,7 @@ Nothing is ever sent off your computer, and nothing personal ends up in this fol
 
 ### 2. Download it
 ```bash
-git clone https://github.com/gulin01/Claude-board.git ~/agent-board
+git clone -b work https://github.com/gulin01/Claude-board.git ~/agent-board
 cd ~/agent-board
 ```
 
@@ -82,10 +82,10 @@ Same board, characters, usage and longevity. Setup asks the same questions.
    - [Python 3.9+](https://www.python.org/downloads/windows/). In the installer, tick **“Add python.exe to PATH”**.
 2. **Download** (in PowerShell):
    ```
-   git clone https://github.com/gulin01/Claude-board.git $HOME\agent-board
+   git clone -b work https://github.com/gulin01/Claude-board.git $HOME\agent-board
    cd $HOME\agent-board
    ```
-   (Git Bash: `git clone https://github.com/gulin01/Claude-board.git ~/agent-board && cd ~/agent-board`)
+   (Git Bash: `git clone -b work https://github.com/gulin01/Claude-board.git ~/agent-board && cd ~/agent-board`)
 3. **Run setup**:
    ```
    py setup.py

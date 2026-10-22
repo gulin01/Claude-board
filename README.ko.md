@@ -28,7 +28,7 @@
 
 ### 2. 내려받기
 ```bash
-git clone https://github.com/gulin01/Claude-board.git ~/agent-board
+git clone -b work https://github.com/gulin01/Claude-board.git ~/agent-board
 cd ~/agent-board
 ```
 
@@ -76,7 +76,7 @@ Mac과 같은 보드, 캐릭터, 사용량을 써요. 질문도 같아요.
    - [Python 3.9+](https://www.python.org/downloads/windows/) — 설치할 때 **"Add python.exe to PATH"** 를 꼭 체크하세요
 2. **내려받기** (PowerShell):
    ```
-   git clone https://github.com/gulin01/Claude-board.git $HOME\agent-board
+   git clone -b work https://github.com/gulin01/Claude-board.git $HOME\agent-board
    cd $HOME\agent-board
    ```
 3. **설치**: `py setup.py` → 언어에서 `2` (한국어) 선택
