@@ -58,10 +58,26 @@ finder also works without the extension.
 
 ### 6. Optional: Claude Desktop chats (connector)
 Claude Desktop's **Chat** conversations aren't stored anywhere the board can read, so setup adds a small
-**Agent Board connector** to Claude Desktop instead. In your chats, Claude then shows longer tasks on the board
-(working → done, with notifications) and can answer *"what are my agents doing?"*.
-- **Restart Claude Desktop** after setup. The first time Claude uses the connector, choose **Always allow**.
-- It only talks to the board on your computer. Older chats from before the connector don't appear.
+**Agent Board connector** to Claude Desktop. Claude in your chats can then show its tasks on the board
+(working → done, with notifications) and answer *"what are my agents doing?"*.
+
+1. **Restart Claude Desktop** so it loads the connector (macOS: ⌘Q, then open it again · Windows: quit it from
+   the tray icon, then open it again).
+2. **Tell Claude when to report.** Claude Desktop → **Settings → Account → Instructions for Claude**,
+   paste this and save:
+   ```
+   When a request takes several steps (research, writing, planning, coding), use the Agent Board connector:
+   call report_progress with status "working" when you start, "done" when you finish (one-line summary),
+   and "needs_input" when you need my decision. Skip quick questions and small talk.
+   ```
+3. **Start a new chat** (the instructions apply to new chats) and check that **Agent Board** is switched on in
+   the tools menu (the slider / **+** icon under the message box).
+4. **Test it:** ask *"Write a short plan for a team lunch next week."* When Claude asks to use Agent Board,
+   choose **Always allow**. A **Desktop · …** tile (▢ badge) appears on the board and a ✅ notification arrives.
+5. **Anytime:** ask *"What are my agents doing?"* and Claude reads the board for you.
+
+Old chats and quick questions don't appear: Claude reports tasks, not every message. It only talks to the board
+on your computer.
 
 ### 7. Restart Claude Code
 Close and reopen any running Claude Code sessions so they pick up the new hooks. That's it: open

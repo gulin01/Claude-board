@@ -115,6 +115,7 @@ KO = [(re.compile(p), r) for p, r in [
     (r"Add the Agent Board connector to Claude Desktop\? \(y/n\)", "Claude 데스크톱에 Agent Board 커넥터를 추가할까요? (y/n)"),
     (r"Claude Desktop chats are", "Claude 데스크톱 채팅은"),
     (r"Restart Claude Desktop to load it\. The first time Claude uses it, choose “Always allow”\.", "적용하려면 Claude 데스크톱을 다시 시작하세요. Claude가 처음 쓸 때 “항상 허용”을 고르세요."),
+    (r"Then: Claude Desktop → Settings → Account → Instructions for Claude, paste:", "그다음: Claude 데스크톱 → 설정 → 계정 → Claude에 대한 지침에 붙여 넣기:"),
     (r"Claude Desktop connector removed \(restart Claude Desktop\)", "Claude 데스크톱 커넥터를 제거했어요 (Claude 데스크톱 다시 시작)"),
     (r"Done\.(.*) Open (.*)Agent Board(.*) on your Desktop, or (\S+)", r"완료!\1 바탕화면에서 \2Agent Board\3를 열거나 \4 로 접속하세요"),
     (r"Notifications show up from Windows PowerShell; turn them on in Settings → System → Notifications if needed\.", "알림은 Windows PowerShell 이름으로 와요. 필요하면 설정 → 시스템 → 알림에서 켜세요."),
@@ -492,6 +493,10 @@ def chrome_extension(interactive=True):
     ok("Opened. When it's loaded, the board's Tabs button shows your tabs.")
 
 
+CONNECTOR_TEXT_EN = 'When a request takes several steps (research, writing, planning, coding), use the Agent Board connector:\ncall report_progress with status "working" when you start, "done" when you finish (one-line summary),\nand "needs_input" when you need my decision. Skip quick questions and small talk.'
+CONNECTOR_TEXT_KO = '여러 단계가 필요한 요청(조사, 글쓰기, 계획, 코딩)을 받으면 Agent Board 커넥터를 사용하세요:\n시작할 때 status "working", 끝나면 "done"(한 줄 요약), 내 결정이 필요하면 "needs_input"으로\nreport_progress를 호출하세요. 간단한 질문이나 잡담은 보고하지 마세요.'
+
+
 def desktop_connector(cfg, wanted=None):
     """Add the Agent Board connector (local MCP server) to Claude Desktop, so chats can report to the board."""
     step(7, "Claude Desktop chats (connector)")
@@ -518,6 +523,10 @@ def desktop_connector(cfg, wanted=None):
     write(DESKTOP_CONFIG, json.dumps(dc, indent=2, ensure_ascii=False) + "\n")
     ok("Connector added")
     say(f"   {D}Restart Claude Desktop to load it. The first time Claude uses it, choose “Always allow”.{X}")
+    # The text users paste into Claude Desktop → Settings → Account → Instructions for Claude.
+    say("   Then: Claude Desktop → Settings → Account → Instructions for Claude, paste:")
+    text = CONNECTOR_TEXT_KO if LANG == "ko" else CONNECTOR_TEXT_EN
+    print("\n".join(f"      {l}" for l in text.splitlines()))
 
 
 def remove_desktop_connector():
