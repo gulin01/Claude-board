@@ -4,7 +4,8 @@
 little animated character: waving = it needs you, typing = working, ✓ = done, sweating = it's grown too big and
 should be restarted. Work and personal projects are kept apart, so coworkers never see your personal ones.
 
-Runs **only on your Mac**. Nothing is sent anywhere. macOS only.
+Runs **only on your computer**. Nothing is sent anywhere. Works on **macOS** and **Windows**
+(see [Windows](#windows) for what's different there).
 
 ## Start here: setup in 5 minutes
 
@@ -58,6 +59,39 @@ Close and reopen any running Claude Code sessions so they pick up the new hooks.
   and remembers. Until then it shows in an **Unsorted** room with two buttons to sort it.
 - **Notifications** for personal projects only arrive in personal hours (or while you're in Personal).
 
+## Windows
+
+Same board, characters, Work/Personal spaces, usage and longevity. Setup is the same 4 questions.
+
+### Setup on Windows
+1. **Install** (if you don't have them):
+   - [Claude Code](https://docs.anthropic.com/claude-code) for Windows, signed in. It also needs
+     [Git for Windows](https://git-scm.com/download/win).
+   - [Python 3.9+](https://www.python.org/downloads/windows/). In the installer, tick **“Add python.exe to PATH”**.
+2. **Download** (in PowerShell):
+   ```
+   git clone https://github.com/gulin01/Claude-board.git $HOME\agent-board
+   cd $HOME\agent-board
+   ```
+   (Git Bash: `git clone https://github.com/gulin01/Claude-board.git ~/agent-board && cd ~/agent-board`)
+3. **Run setup** and answer the 4 questions:
+   ```
+   py setup.py
+   ```
+4. **Restart Claude Code** sessions. Open **Agent Board** on your Desktop: it opens in its own Chrome/Edge window.
+
+### What's different on Windows
+| | macOS | Windows |
+|---|---|---|
+| Board, characters, Work/Personal, usage, longevity | ✅ | ✅ |
+| Notifications (click opens the agent) | ✅ Agent Board app | ✅ Windows notifications (shown as *Windows PowerShell*) |
+| Starts at login | ✅ login items | ✅ Startup folder |
+| Desktop icon | ✅ Mac app window | ✅ Chrome/Edge app window |
+| Chrome tab finder, menu-bar buddy, TV-mode app window | ✅ | ⏳ not yet (the board's TV mode works in the browser) |
+
+Notifications not showing? Settings → System → Notifications → turn on **Windows PowerShell**.
+Remove it with `py setup.py --uninstall`.
+
 ### Every day
 - **Open “Agent Board”** on your Desktop. It starts by itself at login; the board also works at http://127.0.0.1:4317.
 - **Tap an agent** to see what it did and act: open its preview, jump to its Chrome tab, resume it, or start fresh.
@@ -72,7 +106,7 @@ Close and reopen any running Claude Code sessions so they pick up the new hooks.
 | Board is empty | Use Claude Code once, then wait a few seconds. Agents appear by themselves |
 | No notifications | System Settings → Notifications → **Agent Board** → Allow. Restart Claude Code sessions |
 | No plan usage (5-hour / weekly %) | Send one message in Claude Code; it updates from Claude Code's status line |
-| “Starting Agent Board…” stays | Run `python3 setup.py` again, or start the board by hand: `python3 server.py` |
+| “Starting Agent Board…” stays / page won't load | Run setup again, or start the board by hand: `python3 server.py` (Windows: `py server.py`) |
 | Chrome tabs missing | System Settings → Privacy & Security → Automation → python3 → turn on Google Chrome |
 | A project is in the wrong space | Open the agent → **More** → Room, or `python3 classify.py <folder> work` |
 

@@ -2,11 +2,24 @@
 import json
 import os
 import subprocess
+import sys
 import threading
 import time
 from datetime import datetime
 
 HOME = os.path.expanduser("~")
+WINDOWS = sys.platform == "win32"
+
+
+def under(path, folder):
+    """True if path is inside folder (works with / and \\ separators)."""
+    path, folder = os.path.normcase(os.path.normpath(path)), os.path.normcase(os.path.normpath(folder))
+    return path.startswith(folder.rstrip("\\/") + os.sep)
+
+
+def leaf(path):
+    """Last folder name of a path, on any OS."""
+    return os.path.basename(os.path.normpath(path)) if path else ""
 HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "config.json")
 LOG_FILE = os.path.join(HERE, "data", "notify.log")
@@ -78,8 +91,9 @@ def category_for(cwd_or_name, cfg=None):
     for key, cat in cfg.get("projects", {}).items():
         k = _norm(key)
         # General folders (home, Desktop…) only match themselves, never the projects inside them.
-        nested = k not in GENERAL_DIRS and target.startswith(k.rstrip("/") + "/")
-        if target == k or nested or os.path.basename(k) == target:
+        nested = k not in GENERAL_DIRS and under(target, k)
+        same = os.path.normcase(target) == os.path.normcase(k)
+        if same or nested or os.path.basename(k) == target:
             if len(k) > best_len:
                 best, best_len = cat, len(k)
     return best
@@ -208,8 +222,33 @@ def board_link(fragment=""):
     return BOARD_URL + ("#" + fragment if fragment else "")
 
 
+# Windows toast: shown as from PowerShell; clicking opens the link. Values travel in environment
+# variables, so nothing in a title or message can break out of the script.
+WIN_TOAST = r"""
+[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
+function E($s) { [System.Security.SecurityElement]::Escape($s) }
+$launch = if ($env:AB_URL) { " activationType=`"protocol`" launch=`"$(E $env:AB_URL)`"" } else { "" }
+$audio = if ($env:AB_SOUND -eq "1") { "<audio src=`"ms-winsoundevent:Notification.Default`"/>" } else { "<audio silent=`"true`"/>" }
+$xml = "<toast$launch><visual><binding template=`"ToastGeneric`"><text>$(E $env:AB_TITLE)</text><text>$(E $env:AB_SUBTITLE)</text><text>$(E $env:AB_BODY)</text></binding></visual>$audio</toast>"
+$doc = New-Object Windows.Data.Xml.Dom.XmlDocument; $doc.LoadXml($xml)
+$toast = [Windows.UI.Notifications.ToastNotification]::new($doc)
+if ($env:AB_ID) { $toast.Tag = $env:AB_ID.Substring(0, [Math]::Min(60, $env:AB_ID.Length)) }
+$app = '{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe'
+[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($app).Show($toast)
+"""
+
+
 def send_notification(title, subtitle, body, sound=True, cfg=None, url=None, nid=None, board_url=None):
     cfg = cfg or load_config()
+    if WINDOWS:
+        env = dict(os.environ, AB_TITLE=title or "Agent Board", AB_SUBTITLE=subtitle or "", AB_BODY=body or "",
+                   AB_URL=url or board_url or "", AB_ID=nid or "", AB_SOUND="1" if sound else "0")
+        r = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", WIN_TOAST],
+                           env=env, capture_output=True, timeout=30, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        if r.returncode != 0:
+            log(f"windows toast failed: {r.stderr.decode(errors='replace').strip()[:300]}")
+        return
     if os.path.exists(NOTIFIER):
         args = [NOTIFIER, "--title", title or "Agent Board", "--subtitle", subtitle or "", "--body", body or " ",
                 "--url", url or "", "--browser", cfg.get("browser") or "", "--id", nid or "",

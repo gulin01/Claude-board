@@ -24,7 +24,7 @@ def main():
         "Before starting on the user's request, ask them one question with AskUserQuestion: "
         f"\"Is {os.path.basename(cwd)} a work or personal project?\" with the options "
         "\"Work\" (notifications any time) and \"Personal\" (notifications only 8 pm–8 am). "
-        f"Then record the answer by running: python3 \"{classify}\" \"{cwd}\" work   (or personal). "
+        f"Then record the answer by running: \"{sys.executable}\" \"{classify}\" \"{cwd}\" work   (or personal). "
         "Mention the choice in one short line, then continue with the request."
     )
     print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": context}}))

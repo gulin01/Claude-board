@@ -2,6 +2,7 @@
 """Agent Board setup: asks a few questions, then installs everything.
 
     python3 setup.py              # interactive setup (safe to run again to change answers)
+                                  # on Windows:  py setup.py
     python3 setup.py --yes        # accept every default, no questions
     python3 setup.py --dry-run    # show what would happen, change nothing
     python3 setup.py --uninstall  # remove hooks, login items and the Desktop shortcut (keeps your data)
@@ -13,10 +14,10 @@ What it asks:
   4. Which Claude accounts are Work and which are Personal
 What it installs:
   - Claude Code hooks + status line in ~/.claude/settings.json (a backup is saved next to it)
-  - the Agent Board app (board window + notifications) and the menu-bar buddy, if Xcode tools exist
-  - login items so the board and menu-bar buddy start when you log in
-  - an "Agent Board" shortcut on your Desktop
-Everything runs only on this Mac. Nothing is sent anywhere.
+  - Mac: the Agent Board app (board window + notifications) and the menu-bar buddy, if Xcode tools exist
+  - start at login (Mac: login items · Windows: Startup folder)
+  - an "Agent Board" shortcut on your Desktop (Windows: opens the board in its own Chrome/Edge window)
+Everything runs only on this computer. Nothing is sent anywhere.
 """
 import glob
 import json
@@ -28,13 +29,18 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOME = os.path.expanduser("~")
+WINDOWS = sys.platform == "win32"
+BOARD = "http://127.0.0.1:4317/"
 CLAUDE_DIR = os.environ.get("CLAUDE_CONFIG_DIR") or os.path.join(HOME, ".claude")
 SETTINGS = os.path.join(CLAUDE_DIR, "settings.json")
 CLAUDE_JSON = os.path.join(os.environ.get("CLAUDE_CONFIG_DIR") or HOME, ".claude.json")
 CONFIG = os.path.join(HERE, "config.json")
 EXAMPLE = os.path.join(HERE, "config.example.json")
 AGENTS = os.path.join(HOME, "Library", "LaunchAgents")
-CHROME_STATE = os.path.join(HOME, "Library", "Application Support", "Google", "Chrome", "Local State")
+CHROME_STATE = (os.path.join(os.environ.get("LOCALAPPDATA", ""), "Google", "Chrome", "User Data", "Local State") if WINDOWS
+                else os.path.join(HOME, "Library", "Application Support", "Google", "Chrome", "Local State"))
+WIN_STARTUP = os.path.join(os.environ.get("APPDATA", ""), "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "Agent Board.vbs")
+HOOK_SCRIPTS = ("notify_hook.py", "session_start_hook.py", "statusline.py")
 NOTIFIER_APP = os.path.join(HERE, "notifier", "Agent Board.app")
 MENU_APP = os.path.join(HERE, "menubar", "Agent Board Menu.app")
 DESKTOP_LINK = os.path.join(HOME, "Desktop", "Agent Board.app")
@@ -43,6 +49,12 @@ GENERAL = {HOME, *(os.path.join(HOME, d) for d in ("Desktop", "Documents", "Down
 YES = "--yes" in sys.argv
 DRY = "--dry-run" in sys.argv
 
+if WINDOWS:
+    os.system("")   # turns on colors in the Windows console
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 B, D, G, Y, R, X = "\033[1m", "\033[2m", "\033[32m", "\033[33m", "\033[31m", "\033[0m"
 
 
@@ -51,6 +63,10 @@ def step(n, title): say(f"\n{B}{n}. {title}{X}")
 def ok(msg): say(f"   {G}✓{X} {msg}")
 def warn(msg): say(f"   {Y}!{X} {msg}")
 def tilde(p): return p.replace(HOME, "~", 1)
+def posix(p): return p.replace("\\", "/")
+def under(path, folder):
+    a, b = os.path.normcase(os.path.normpath(path)), os.path.normcase(os.path.normpath(folder))
+    return a.startswith(b.rstrip("\\/") + os.sep)
 
 
 def ask(question, default=""):
@@ -112,8 +128,8 @@ def project_folders():
     # Keep top-level project folders only (subfolders follow their parent).
     tops = []
     for c in out:
-        if not any(c.startswith(t.rstrip("/") + "/") for t in tops):
-            tops = [t for t in tops if not t.startswith(c.rstrip("/") + "/")] + [c]
+        if not any(under(c, t) for t in tops):
+            tops = [t for t in tops if not under(t, c)] + [c]
     return tops[:25]
 
 
@@ -212,13 +228,29 @@ def configure():
 
 
 # ---------------------------------------------------------------- install
-def hook_cmd(script):
+# Runs a hook script if it still exists and always exits 0, so a moved or deleted folder never blocks Claude.
+WIN_RUNNER = "import os,runpy,sys; p=sys.argv[1]; sys.argv=[p]; os.path.exists(p) and runpy.run_path(p, run_name='__main__')"
+
+
+def hook_entry(script, **extra):
     p = os.path.join(HERE, "hooks", script)
-    return f'f="{p}"; [ -f "$f" ] && python3 "$f"; exit 0'
+    if WINDOWS:   # exec form: no shell involved, so it works with Git Bash or PowerShell alike
+        return {"type": "command", "command": posix(sys.executable), "args": ["-X", "utf8", "-c", WIN_RUNNER, posix(p)], **extra}
+    return {"type": "command", "command": f'f="{p}"; [ -f "$f" ] && python3 "$f"; exit 0', **extra}
+
+
+def statusline_cmd():
+    p = os.path.join(HERE, "hooks", "statusline.py")
+    if not WINDOWS:
+        return f'f="{p}"; [ -f "$f" ] && python3 "$f" || echo ""'
+    py, sc = posix(sys.executable), posix(p)
+    git_bash = shutil.which("bash") or os.path.exists(os.path.join(os.environ.get("PROGRAMFILES", ""), "Git", "bin", "bash.exe"))
+    return f'"{py}" -X utf8 "{sc}"' if git_bash else f'& "{py}" -X utf8 "{sc}"'
 
 
 def is_ours(entry):
-    return HERE in json.dumps(entry) or "agent-board/hooks/" in json.dumps(entry)
+    text = json.dumps(entry)
+    return any(name in text for name in HOOK_SCRIPTS)
 
 
 def install_hooks():
@@ -234,18 +266,17 @@ def install_hooks():
     if os.path.exists(SETTINGS) and not DRY:
         shutil.copy2(SETTINGS, f"{SETTINGS}.bak-{time.strftime('%Y%m%d-%H%M%S')}")
     hooks = settings.setdefault("hooks", {})
-    notify = {"type": "command", "command": hook_cmd("notify_hook.py"), "async": True, "timeout": 20}
+    notify = hook_entry("notify_hook.py", **{"async": True, "timeout": 20})
     wanted = {
         "Stop": {"hooks": [notify]},
         "Notification": {"hooks": [notify]},
         "PreToolUse": {"matcher": "AskUserQuestion", "hooks": [notify]},
-        "SessionStart": {"matcher": "startup", "hooks": [{"type": "command", "command": hook_cmd("session_start_hook.py"), "timeout": 10}]},
+        "SessionStart": {"matcher": "startup", "hooks": [hook_entry("session_start_hook.py", timeout=10)]},
     }
     for event, entry in wanted.items():
         # Replace an earlier Agent Board entry, keep everything else you already had.
         hooks[event] = [e for e in hooks.get(event, []) if not is_ours(e)] + [entry]
-    sl = os.path.join(HERE, "hooks", "statusline.py")
-    line = {"type": "command", "command": f'f="{sl}"; [ -f "$f" ] && python3 "$f" || echo ""', "padding": 0}
+    line = {"type": "command", "command": statusline_cmd(), "padding": 0}
     cur = settings.get("statusLine")
     if cur and not is_ours(cur):
         if ask(f"You already have a status line ({cur.get('command', '')[:40]}…). Replace it? (y/n)", "n").lower().startswith("y"):
@@ -261,6 +292,10 @@ def install_hooks():
 
 def build_apps():
     step(6, "Apps")
+    if WINDOWS:
+        ok("Windows: notifications use Windows' own notification center, so nothing to build")
+        warn("The Chrome tab finder and menu-bar buddy are macOS-only for now")
+        return False
     if not shutil.which("swiftc"):
         warn("Xcode command line tools not found, so the app and menu-bar buddy were skipped.")
         warn("Install them with:  xcode-select --install   then run setup again.")
@@ -291,8 +326,29 @@ def plist(label, args, keep_alive):
 """
 
 
+def pythonw():
+    w = os.path.join(os.path.dirname(sys.executable), "pythonw.exe")
+    return w if os.path.exists(w) else sys.executable
+
+
+def windows_startup():
+    """Startup-folder script that runs the board server hidden at login; also starts it now."""
+    server = os.path.join(HERE, "server.py")
+    vbs = (f'Set sh = CreateObject("WScript.Shell")\r\n'
+           f'sh.CurrentDirectory = "{HERE}"\r\n'
+           f'sh.Run """{pythonw()}"" -X utf8 ""{server}""", 0, False\r\n')
+    write(WIN_STARTUP, vbs)
+    ok("Board server starts when you sign in to Windows")
+    if not DRY:
+        flags = getattr(subprocess, "DETACHED_PROCESS", 0) | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0) | getattr(subprocess, "CREATE_NO_WINDOW", 0)
+        subprocess.Popen([pythonw(), "-X", "utf8", server], cwd=HERE, creationflags=flags, close_fds=True)
+        ok("Board server started")
+
+
 def login_items(apps_built):
     step(7, "Start at login")
+    if WINDOWS:
+        return windows_startup()
     uid = str(os.getuid())
     items = [("com.agent-board.server", [sys.executable, os.path.join(HERE, "server.py")], True, "Board server")]
     menu_bin = os.path.join(MENU_APP, "Contents", "MacOS", "agent-board-menu")
@@ -306,7 +362,29 @@ def login_items(apps_built):
         ok(f"{what} starts at login") if r.returncode == 0 else warn(f"{what}: {r.stderr.strip()}")
 
 
+def windows_browser():
+    for base in (os.environ.get("PROGRAMFILES"), os.environ.get("PROGRAMFILES(X86)"), os.environ.get("LOCALAPPDATA")):
+        for rel in (("Google", "Chrome", "Application", "chrome.exe"), ("Microsoft", "Edge", "Application", "msedge.exe")):
+            p = os.path.join(base or "", *rel)
+            if base and os.path.exists(p):
+                return p
+    return None
+
+
+def windows_shortcut():
+    """Desktop shortcut that opens the board in its own Chrome/Edge window (no tabs, no address bar)."""
+    exe = windows_browser()
+    ps = ("$d=[Environment]::GetFolderPath('Desktop'); "
+          "$s=(New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $d 'Agent Board.lnk')); "
+          f"$s.TargetPath='{exe or BOARD}'; " + (f"$s.Arguments='--app={BOARD}'; " if exe else "") +
+          "$s.Description='Agent Board'; $s.Save()")
+    r = run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps], check=False)
+    ok("Added “Agent Board” to your Desktop") if r.returncode == 0 else warn(f"Couldn't add the Desktop shortcut: {r.stderr.strip()[:200]}")
+
+
 def shortcut():
+    if WINDOWS:
+        return windows_shortcut()
     if not os.path.exists(NOTIFIER_APP) and not DRY:
         return
     if not DRY:
@@ -332,6 +410,15 @@ def uninstall():
         ok("Hooks and status line removed")
     except (OSError, ValueError):
         pass
+    if WINDOWS:
+        if os.path.exists(WIN_STARTUP) and not DRY:
+            os.remove(WIN_STARTUP)
+        server = os.path.join(HERE, "server.py").replace("'", "''")
+        run(["powershell", "-NoProfile", "-Command",
+             "$d=[Environment]::GetFolderPath('Desktop'); Remove-Item (Join-Path $d 'Agent Board.lnk') -ErrorAction SilentlyContinue; "
+             f"Get-CimInstance Win32_Process | Where-Object {{ $_.CommandLine -like '*{server}*' }} | ForEach-Object {{ Stop-Process -Id $_.ProcessId }}"], check=False)
+        ok("Startup item, Desktop shortcut and running board removed")
+        return
     for label in ("com.agent-board.server", "com.agent-board.menubar"):
         run(["launchctl", "bootout", f"gui/{os.getuid()}/{label}"], check=False)
         p = os.path.join(AGENTS, label + ".plist")
@@ -344,8 +431,8 @@ def uninstall():
 
 
 def main():
-    if sys.platform != "darwin":
-        sys.exit("Agent Board runs on macOS only.")
+    if sys.platform not in ("darwin", "win32"):
+        sys.exit("Agent Board runs on macOS and Windows.")
     if sys.version_info < (3, 9):
         sys.exit("Please use Python 3.9 or newer.")
     if "--uninstall" in sys.argv:
@@ -353,13 +440,21 @@ def main():
     say(f"\n{B}Agent Board setup{X}  {D}{'(dry run: nothing will change)' if DRY else ''}{X}")
     say(f"{D}A few questions, then everything installs. Press Enter to accept the [default].{X}")
     if not os.path.isdir(CLAUDE_DIR):
-        warn("Claude Code doesn't seem to be installed yet (no ~/.claude). Install it first, then run setup again.")
+        warn(f"Claude Code doesn't seem to be installed yet (no {tilde(CLAUDE_DIR)}). Install it first, then run setup again.")
     configure()
     install_hooks()
     built = build_apps()
     login_items(built)
     shortcut()
-    say(f"\n{G}{B}Done.{X} Open {B}Agent Board{X} on your Desktop, or http://127.0.0.1:4317")
+    say(f"\n{G}{B}Done.{X} Open {B}Agent Board{X} on your Desktop, or {BOARD}")
+    if WINDOWS:
+        say(f"{D}Notifications show up from Windows PowerShell; turn them on in Settings → System → Notifications if needed.")
+        say(f"Restart open Claude Code sessions to load the hooks.{X}\n")
+        if not DRY:
+            time.sleep(2)
+            import webbrowser
+            webbrowser.open(BOARD)
+        return
     say(f"{D}macOS may ask to allow notifications from Agent Board, and to let python3 control Google Chrome")
     say(f"(for the tab finder). Both are optional. Restart open Claude Code sessions to load the hooks.{X}\n")
     if not DRY and os.path.exists(NOTIFIER_APP):

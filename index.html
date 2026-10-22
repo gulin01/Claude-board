@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agent Board</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cellipse cx='32' cy='36' rx='26' ry='24' fill='%2323BFB0'/%3E%3Cellipse cx='23' cy='32' rx='6' ry='7' fill='white'/%3E%3Cellipse cx='41' cy='32' rx='6' ry='7' fill='white'/%3E%3Ccircle cx='24' cy='34' r='3' fill='%23131827'/%3E%3Ccircle cx='42' cy='34' r='3' fill='%23131827'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
@@ -608,7 +609,7 @@ function renderRooms(){
 // ---------- Sheet: agent details ----------
 function agentSheet(s){
   const m = mood(s), f = fuel(s), c = s.counts || {run: 0, page: 0};
-  const projFiles = s.files.filter(x => !/^[~\/]/.test(x.path));
+  const projFiles = s.files.filter(x => !/^([~\/\\]|[A-Za-z]:[\\/])/.test(x.path));
   const openTab = (tabsData || []).find(t => (t.agents || []).some(a => a.id === s.id));
   const retire = s.life && s.life.retire.length;
   const btns = [];
@@ -733,6 +734,7 @@ async function load(){
 async function loadTabs(){
   try { const j = await (await fetch("/api/tabs")).json(); tabsData = j.tabs; tabsErr = j.error || ""; }
   catch { tabsErr = "Board server not reachable"; }
+  $("#tabsBtn").hidden = /macOS only/.test(tabsErr);
   const live = (tabsData || []).filter(t => t.live).length;
   $("#tabsN").textContent = (tabsData || []).filter(t => t.agents || t.claude).length; $("#tabsN").classList.toggle("hot", live > 0);
   renderRooms(); if (sheet.kind === "tabs" || sheet.kind === "agent") renderSheet(false);
@@ -769,7 +771,7 @@ async function copy(text, msg){
   }
 }
 function handoff(s){
-  const files = s.files.filter(f => !/^[~\/]/.test(f.path)).slice(0, 15).map(f => "- " + f.path).join("\n");
+  const files = s.files.filter(f => !/^([~\/\\]|[A-Za-z]:[\\/])/.test(f.path)).slice(0, 15).map(f => "- " + f.path).join("\n");
   return [`Continue a task from an earlier Claude session (${s.id}), which got long. Start fresh here; don't redo finished work.`, ``,
     `Project: ${s.cwd}${s.branch ? ` (branch ${s.branch})` : ""}`, ``, `Original task:`, (s.task || "").slice(0, 1500), ``,
     `Where it left off:`, (s.latest || "").slice(0, 1500), files ? `\nFiles it changed (read as needed):\n${files}` : "", ``,

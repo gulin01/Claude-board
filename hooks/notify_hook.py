@@ -72,14 +72,14 @@ def main():
     cwd = data.get("cwd") or ""
     cfg = common.load_config()
     category = common.category_for(cwd, cfg)
-    project = os.path.basename(cwd.rstrip("/")) or "Claude"
+    project = common.leaf(cwd) or "Claude"
     if common.is_scratch(cwd):
         project = "No folder"
 
     title, first_prompt, last_text, files = read_turn(data.get("transcript_path"))
     task = title or first_sentence(first_prompt or "", 60) or "Claude session"
     # Agent memory/scratch files don't count as project changes.
-    files = {f for f in files if f and f.startswith(cwd.rstrip("/") + "/")}
+    files = {f for f in files if f and common.under(f, cwd)}
 
     sid = data.get("session_id") or ""
     link = common.board_link("s=" + sid if sid else "")

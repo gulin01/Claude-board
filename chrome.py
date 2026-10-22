@@ -1,5 +1,7 @@
 """Find and switch to open Google Chrome tabs (via macOS scripting; no extension needed).
 
+On Windows the tab finder is off for now: links simply open in the default browser.
+
 Incognito windows are never listed. Nothing here closes tabs or reads page contents:
 only each tab's title and URL.
 """
@@ -9,16 +11,31 @@ import os
 import re
 import struct
 import subprocess
+import sys
 import time
+import webbrowser
 from urllib.parse import urlsplit
 
-CHROME_DIR = os.path.expanduser("~/Library/Application Support/Google/Chrome")
+WINDOWS = sys.platform == "win32"
+CHROME_DIR = (os.path.join(os.environ.get("LOCALAPPDATA", ""), "Google", "Chrome", "User Data") if WINDOWS
+              else os.path.expanduser("~/Library/Application Support/Google/Chrome"))
 _sess_cache = {}   # session file path -> (mtime, window ids, urls)
 
 _cache = {"at": 0.0, "tabs": None}
 
 
+def chrome_exe():
+    """Path to chrome.exe on Windows, or None."""
+    for base in (os.environ.get("PROGRAMFILES"), os.environ.get("PROGRAMFILES(X86)"), os.environ.get("LOCALAPPDATA")):
+        p = os.path.join(base or "", "Google", "Chrome", "Application", "chrome.exe")
+        if base and os.path.exists(p):
+            return p
+    return None
+
+
 def _jxa(script, *args):
+    if WINDOWS:
+        raise RuntimeError("The Chrome tab finder works on macOS only for now.")
     r = subprocess.run(["osascript", "-l", "JavaScript", "-e", script, *args],
                        capture_output=True, text=True, timeout=15)
     if r.returncode != 0:
@@ -147,6 +164,13 @@ def open_in_profile(url, email=None, profile=None):
         raise ValueError("only claude.ai pages")
     profs = profiles()
     prof = profile if profile in profs else next((d for d, p in profs.items() if p["email"].lower() == (email or "").lower()), None)
+    if WINDOWS:
+        exe = chrome_exe()
+        if not exe:
+            webbrowser.open(url)
+            return None
+        subprocess.Popen([exe] + ([f"--profile-directory={prof}"] if prof else []) + [url])
+        return prof
     args = ["open", "-na", "Google Chrome", "--args"] + ([f"--profile-directory={prof}"] if prof else []) + [url]
     subprocess.run(args, check=True, timeout=15)
     return prof
@@ -196,6 +220,9 @@ def find_tab(url, tabs=None):
 def open_or_focus(url):
     if not url.lower().startswith(("http://", "https://")):
         raise ValueError("only http(s) links")
+    if WINDOWS:
+        webbrowser.open(url)
+        return "opened"
     t = find_tab(url)
     if t:
         focus(t["window"], t["tab"])

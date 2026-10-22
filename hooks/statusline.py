@@ -93,7 +93,7 @@ def main():
     data = json.load(sys.stdin)
     save_usage(data)
     cwd = (data.get("workspace") or {}).get("current_dir") or data.get("cwd") or ""
-    parts = [os.path.basename(cwd.rstrip("/")) or "~"]
+    parts = [os.path.basename(os.path.normpath(cwd)) if cwd else "~"]
     path = data.get("transcript_path")
     d = first_day(path) if path else None
     if d:

@@ -80,8 +80,8 @@ def short(s, n=160):
 def rel(path, cwd):
     if not path:
         return ""
-    if cwd and path.startswith(cwd.rstrip("/") + "/"):
-        return path[len(cwd.rstrip("/")) + 1:]
+    if cwd and common.under(path, cwd):
+        return os.path.relpath(path, cwd).replace(os.sep, "/")
     return path.replace(HOME, "~")
 
 
@@ -314,7 +314,7 @@ def collect_sessions(days):
             "id": s["id"],
             "kind": "claude-code",
             "title": s["title"] or short(first, 70) or "(untitled)",
-            "project": "No folder" if common.is_scratch(cwd) else "Home" if cwd.rstrip("/") == HOME else os.path.basename(cwd.rstrip("/")) or "~",
+            "project": "No folder" if common.is_scratch(cwd) else "Home" if os.path.normcase(os.path.normpath(cwd)) == os.path.normcase(HOME) else common.leaf(cwd) or "~",
             "cwd": cwd.replace(HOME, "~"),
             "is_scratch": common.is_scratch(cwd),
             "category": common.category_for(cwd, cfg) or "unsorted",
