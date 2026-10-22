@@ -398,7 +398,7 @@ def collect_external(cutoff, now, cfg):
             "project": a["project"] or "(no project)",
             "cwd": "",
             "is_scratch": False,
-            "category": common.category_for(a["project"], cfg) or "unsorted",
+            "category": common.reported_category(a["project"], a["source"], cfg) or "unsorted",
             "classify_key": a["project"] or "",
             "branch": None,
             "source": a["source"] or "Reported",
@@ -563,7 +563,7 @@ def add_event(body):
     if label:
         # Clicking opens the page the agent is working on (e.g. its Chrome tab), else its card on the board.
         link = e["url"] or common.board_link("s=ext-" + re.sub(r"\W+", "-", e["agent"].lower()))
-        common.notify(common.category_for(e["project"]), f"{e['project'] or e['agent']}  ·  {label}",
+        common.notify(common.reported_category(e["project"], e["source"]), f"{e['project'] or e['agent']}  ·  {label}",
                       e["agent"], e["message"] or e["status"], url=link, nid="ext-" + e["agent"])
     return e
 

@@ -48,6 +48,10 @@ CHROME_STATE = (os.path.join(os.environ.get("LOCALAPPDATA", ""), "Google", "Chro
 WIN_STARTUP = os.path.join(os.environ.get("APPDATA", ""), "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "Agent Board.vbs")
 HOOK_SCRIPTS = ("notify_hook.py", "session_start_hook.py", "statusline.py")
 EXTENSION_DIR = os.path.join(HERE, "extension")
+CONNECTOR = os.path.join(HERE, "connector", "agent_board_mcp.py")
+DESKTOP_DIR = (os.path.join(os.environ.get("APPDATA", ""), "Claude") if WINDOWS
+               else os.path.join(HOME, "Library", "Application Support", "Claude"))
+DESKTOP_CONFIG = os.path.join(DESKTOP_DIR, "claude_desktop_config.json")
 TRAY = os.path.join(HERE, "tray", "tray.ps1")
 NOTIFIER_APP = os.path.join(HERE, "notifier", "Agent Board.app")
 MENU_APP = os.path.join(HERE, "menubar", "Agent Board Menu.app")
@@ -124,6 +128,15 @@ KO = [(re.compile(p), r) for p, r in [
     (r"Repeat in each Chrome profile you use \(each Google account has its own extensions\)", "쓰는 Chrome 프로필마다 반복하세요 (Google 계정마다 확장 프로그램이 따로 있어요)"),
     (r"Open Chrome's extensions page and the folder now\? \(y/n\)", "지금 Chrome 확장 프로그램 페이지와 폴더를 열까요? (y/n)"),
     (r"Opened\. When it's loaded, the board's Tabs button shows your tabs\.", "열었어요. 추가가 끝나면 보드의 탭 버튼에서 탭이 보여요."),
+    (r"Claude Desktop chats \(connector\)", "Claude 데스크톱 채팅 (커넥터)"),
+    (r"Claude Desktop not found, skipping\.", "Claude 데스크톱이 없어서 건너뛰어요."),
+    (r"Lets Claude in your Desktop chats show tasks on the board and answer “what are my agents doing\?”\.", "데스크톱 채팅의 Claude가 작업을 보드에 보여 주고 “에이전트들 뭐 하고 있어?”에 답할 수 있어요."),
+    (r"Add the Agent Board connector to Claude Desktop\? \(y/n\)", "Claude 데스크톱에 Agent Board 커넥터를 추가할까요? (y/n)"),
+    (r"Claude Desktop chats are", "Claude 데스크톱 채팅은"),
+    (r"Connector added \(chats count as work\)", "커넥터를 추가했어요 (채팅은 업무로 분류)"),
+    (r"Connector added \(chats count as personal\)", "커넥터를 추가했어요 (채팅은 개인으로 분류)"),
+    (r"Restart Claude Desktop to load it\. The first time Claude uses it, choose “Always allow”\.", "적용하려면 Claude 데스크톱을 다시 시작하세요. Claude가 처음 쓸 때 “항상 허용”을 고르세요."),
+    (r"Claude Desktop connector removed \(restart Claude Desktop\)", "Claude 데스크톱 커넥터를 제거했어요 (Claude 데스크톱 다시 시작)"),
     (r"Done\.(.*) Open (.*)Agent Board(.*) on your Desktop, or (\S+)", r"완료!\1 바탕화면에서 \2Agent Board\3를 열거나 \4 로 접속하세요"),
     (r"Notifications show up from Windows PowerShell; turn them on in Settings → System → Notifications if needed\.", "알림은 Windows PowerShell 이름으로 와요. 필요하면 설정 → 시스템 → 알림에서 켜세요."),
     (r"Restart open Claude Code sessions to load the hooks\.", "열려 있는 Claude Code 세션을 다시 시작해 주세요."),
@@ -340,6 +353,7 @@ def detect():
         "claude_account": claude_code_account(),
         "xcode_tools": bool(shutil.which("swiftc")) if not WINDOWS else None,
         "chrome_installed": chrome,
+        "claude_desktop_installed": os.path.isdir(DESKTOP_DIR),
         "chrome_extension_folder": EXTENSION_DIR,
         "chrome_extension_steps": [s.format(folder=EXTENSION_DIR) for s in EXTENSION_STEPS],
         "projects": project_folders(),
@@ -591,8 +605,54 @@ def chrome_extension(interactive=True):
     ok("Opened. When it's loaded, the board's Tabs button shows your tabs.")
 
 
+def desktop_connector(cfg, wanted=None, space=None):
+    """Add the Agent Board connector (local MCP server) to Claude Desktop, so chats can report to the board."""
+    step(9, "Claude Desktop chats (connector)")
+    if not os.path.isdir(DESKTOP_DIR):
+        warn("Claude Desktop not found, skipping.")
+        return
+    say(f"   {D}Lets Claude in your Desktop chats show tasks on the board and answer “what are my agents doing?”.{X}")
+    if wanted is None:
+        wanted = ask("Add the Agent Board connector to Claude Desktop? (y/n)", "y").lower().startswith("y")
+    if not wanted:
+        return
+    if space not in ("work", "personal"):
+        acct = claude_code_account()
+        default = "w" if (cfg.get("account_spaces") or {}).get(acct, "work") == "work" else "p"
+        space = ask_space("Claude Desktop chats are", cfg.get("desktop_chats_space", "")[:1] or default) or "personal"
+    cfg["desktop_chats_space"] = space
+    write(CONFIG, json.dumps(cfg, indent=2, ensure_ascii=False) + "\n")
+    try:
+        with open(DESKTOP_CONFIG, encoding="utf-8") as fh:
+            dc = json.load(fh)
+    except FileNotFoundError:
+        dc = {}
+    except ValueError:
+        warn(f"{tilde(DESKTOP_CONFIG)} isn't valid JSON. Fix it, then run setup again.")
+        return
+    if os.path.exists(DESKTOP_CONFIG) and not DRY:
+        shutil.copy2(DESKTOP_CONFIG, f"{DESKTOP_CONFIG}.bak-{time.strftime('%Y%m%d-%H%M%S')}")
+    py = posix(sys.executable) if WINDOWS else sys.executable
+    dc.setdefault("mcpServers", {})["agent-board"] = {"command": py, "args": ["-X", "utf8", posix(CONNECTOR) if WINDOWS else CONNECTOR]}
+    write(DESKTOP_CONFIG, json.dumps(dc, indent=2, ensure_ascii=False) + "\n")
+    ok(f"Connector added (chats count as {space})")
+    say(f"   {D}Restart Claude Desktop to load it. The first time Claude uses it, choose “Always allow”.{X}")
+
+
+def remove_desktop_connector():
+    try:
+        with open(DESKTOP_CONFIG, encoding="utf-8") as fh:
+            dc = json.load(fh)
+    except (OSError, ValueError):
+        return
+    if (dc.get("mcpServers") or {}).pop("agent-board", None) is not None:
+        write(DESKTOP_CONFIG, json.dumps(dc, indent=2, ensure_ascii=False) + "\n")
+        ok("Claude Desktop connector removed (restart Claude Desktop)")
+
+
 def uninstall():
     say(f"{B}Removing Agent Board from Claude Code and login items{X} {D}(your data and config stay){X}")
+    remove_desktop_connector()
     try:
         with open(SETTINGS, encoding="utf-8") as fh:
             settings = json.load(fh)
@@ -652,6 +712,15 @@ def main():
     login_items(built)
     shortcut()
     chrome_extension(interactive="--answers" not in sys.argv and not YES)
+    if "--answers" in sys.argv:
+        with open(sys.argv[sys.argv.index("--answers") + 1], encoding="utf-8") as fh:
+            a = json.load(fh)
+        cfg = json.load(open(CONFIG, encoding="utf-8")) if os.path.exists(CONFIG) else {}
+        if a.get("desktop_connector", True):
+            desktop_connector(cfg, wanted=True, space=a.get("desktop_chats_space"))
+    else:
+        cfg = json.load(open(CONFIG, encoding="utf-8")) if os.path.exists(CONFIG) else {}
+        desktop_connector(cfg, wanted=True if YES else None)
     say(f"\n{G}{B}Done.{X} Open {B}Agent Board{X} on your Desktop, or {BOARD}")
     if WINDOWS:
         say(f"{D}Notifications show up from Windows PowerShell; turn them on in Settings → System → Notifications if needed.")

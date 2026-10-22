@@ -71,6 +71,8 @@ DEFAULT_CONFIG = {
     "stale_after_hours": 24,
     # Language for the board, notifications and buddies: "auto" (follow the computer), "en" or "ko".
     "language": "auto",
+    # Claude Desktop chats (via the Agent Board connector) without a project: "work" or "personal".
+    "desktop_chats_space": "",
     # Longevity: agents older than this many days, or with a context bigger than this, should be restarted.
     "fresh_days": 2,
     "context_warn_k": 250,
@@ -131,6 +133,16 @@ def category_for(cwd_or_name, cfg=None):
             if len(k) > best_len:
                 best, best_len = cat, len(k)
     return best
+
+
+def reported_category(project, source, cfg=None):
+    """Space for an agent that reports itself (Chrome, Claude Desktop chats): its project's space if known,
+    else Claude Desktop chats follow `desktop_chats_space`; anything else stays unsorted."""
+    cfg = cfg or load_config()
+    cat = category_for(project, cfg) if project else None
+    if not cat and source == "Claude Desktop":
+        cat = cfg.get("desktop_chats_space") if cfg.get("desktop_chats_space") in CATEGORIES else None
+    return cat
 
 
 def needs_classification(cwd, cfg=None):

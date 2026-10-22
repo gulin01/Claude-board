@@ -51,10 +51,10 @@ work through the first unchecked item. Commit after each checked item.
 - [x] Test both languages, commit, push
 
 ## Claude Desktop chats · connector
-- [ ] connector/agent_board_mcp.py: stdio MCP server (stdlib), tools report_progress + list_agents
-- [ ] Server: Desktop chats get their own space setting (desktop_chats_space); ▢ badge
-- [ ] setup.py: add/remove the connector in claude_desktop_config.json (Mac + Windows), ask the space
-- [ ] Test with a simulated Claude Desktop, install on this Mac, README/CLAUDE.md, commit, push
+- [x] connector/agent_board_mcp.py: stdio MCP server (stdlib), tools report_progress + list_agents
+- [x] Server: Desktop chats get their own space setting (desktop_chats_space); ▢ badge
+- [x] setup.py: add/remove the connector in claude_desktop_config.json (Mac + Windows), ask the space
+- [x] Test with a simulated Claude Desktop, install on this Mac, README/CLAUDE.md, commit, push
 
 ## Step 4 · Product
 - [ ] One-click setup, settings screen, EN / 한국어 / O'zbek, Mac app

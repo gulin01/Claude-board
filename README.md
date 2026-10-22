@@ -62,7 +62,15 @@ Lets the board find your open Chrome tabs and jump to them. Setup opens the righ
 Do this once in each Chrome profile you use (each Google account has its own extensions). On macOS the tab
 finder also works without the extension.
 
-### 6. Restart Claude Code
+### 6. Optional: Claude Desktop chats (connector)
+Claude Desktop's **Chat** conversations aren't stored anywhere the board can read, so setup adds a small
+**Agent Board connector** to Claude Desktop instead. In your chats, Claude then shows longer tasks on the board
+(working → done, with notifications) and can answer *"what are my agents doing?"*.
+- Setup asks whether Desktop chats count as **Work** or **Personal**.
+- **Restart Claude Desktop** after setup. The first time Claude uses the connector, choose **Always allow**.
+- It only talks to the board on your computer. Older chats from before the connector don't appear.
+
+### 7. Restart Claude Code
 Close and reopen any running Claude Code sessions so they pick up the new hooks. That's it: open
 **Agent Board** on your Desktop. Your agents appear as soon as you use Claude Code.
 

@@ -44,6 +44,9 @@ Use `python3` on macOS and `py` on Windows (if `py` is missing, try `python`).
    - **Each Chrome profile**: Work or Personal (unmarked = Personal), and whether they use Claude
      (extension / claude.ai) in that profile.
    - **Their Claude Code account** (`claude_account`): Work or Personal.
+   - If `claude_desktop_installed`: add the **Claude Desktop connector**? (yes by default) and do Desktop
+     **chats** count as Work or Personal? (Desktop chat history isn't readable locally; the connector lets Claude
+     in their chats report tasks to the board and answer "what are my agents doing?".)
 4. **Write the answers** to a temp file outside this folder, in this format (all keys optional):
    ```json
    {
@@ -52,7 +55,9 @@ Use `python3` on macOS and `py` on Windows (if `py` is missing, try `python`).
      "projects": {"/Users/kim/code/acme": "work", "/Users/kim/code/blog": "personal"},
      "chrome_profiles": {"Default": "personal", "Profile 1": "work"},
      "claude_in_chrome": ["Default"],
-     "claude_account_space": "work"
+     "claude_account_space": "work",
+     "desktop_connector": true,
+     "desktop_chats_space": "work"
    }
    ```
    Use the exact `dir` values from `chrome_profiles` and the exact paths from `projects`.
@@ -67,6 +72,7 @@ Use `python3` on macOS and `py` on Windows (if `py` is missing, try `python`).
    - Allow the notification prompt (macOS: from "Agent Board"; Windows: from "Windows PowerShell").
    - macOS: allow "python3 wants to control Google Chrome" if asked (tab finder without the extension).
    - **Restart running Claude Code sessions** so they load the hooks.
+   - If the connector was added: **restart Claude Desktop**, and choose **Always allow** the first time Claude uses it.
    - Open **Agent Board** on the Desktop.
 7. **Offer the Chrome tab finder** (optional): read out `chrome_extension_steps` from `--detect`.
    You cannot install a Chrome extension yourself; the user clicks through `chrome://extensions` →
@@ -95,6 +101,6 @@ Use `python3` on macOS and `py` on Windows (if `py` is missing, try `python`).
 
 `server.py` board server + API · `index.html` the board (single page) · `common.py` settings, spaces,
 notifications · `cleanup.py` idle agents + trash · `chrome.py` Chrome tabs (extension bridge + macOS scripting) ·
-`hooks/` Claude Code hooks + status line · `extension/` Chrome extension · `notifier/` macOS app (board window +
+`hooks/` Claude Code hooks + status line · `connector/` Claude Desktop connector (MCP) · `extension/` Chrome extension · `notifier/` macOS app (board window +
 notifications) · `menubar/` macOS menu-bar buddy · `tray/` Windows tray buddy · `setup.py` installer.
 Before pushing anywhere, check that no personal names, paths or emails were added to tracked files.

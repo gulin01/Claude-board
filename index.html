@@ -563,7 +563,7 @@ function firstSentence(t, n = 140){
   const m = /^(.+?[.!?。])(\s|$)/.exec(line); const s = (m ? m[1] : line).replace(/[:：]$/, "");
   return s.length > n ? s.slice(0, n - 1) + "…" : s;
 }
-function whereOf(s){ return s.kind === "external" ? "◎" : s.source === "Desktop app" ? "▢" : ">_"; }
+function whereOf(s){ return s.source === "Claude Desktop" || s.source === "Desktop app" ? "▢" : s.kind === "external" ? "◎" : ">_"; }
 
 // Mood = what the character shows. Order matters: the most urgent wins.
 function mood(s){
