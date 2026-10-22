@@ -314,14 +314,8 @@ def open_or_focus(url):
         if t:
             focus(t["window"], t["tab"])
             return "focused"
-        # Open it in a Chrome profile that belongs to the current space (work links in the work profile).
-        import common
-        space = common.current_space()
-        conns = bridge.snapshot()
-        profs = {p["email"].lower(): d for d, p in profiles().items() if p["email"]}
-        pick = next((cid for cid, email, _ in conns
-                     if common.space_of_profile(profs.get((email or "").lower()), None) == space), conns[0][0])
-        bridge.send(pick, {"type": "open", "url": url})
+        # Open it in the first connected Chrome profile.
+        bridge.send(bridge.snapshot()[0][0], {"type": "open", "url": url})
         return "opened"
     if WINDOWS:
         webbrowser.open(url)

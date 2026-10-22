@@ -20,11 +20,16 @@
   --body:"Figtree","Helvetica Neue","Apple SD Gothic Neo","Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
-@media (prefers-color-scheme: dark){:root{
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0E1220; --panel:#161B2B; --ink:#EDF0F7; --muted:#99A2B7; --line:#262D42; --soft:#1D2335;
   --accent:#7D8CFF; --work:#4DA0FF; --need:#FFAC45; --done:#34C987; --sleep:#6F7890; --tired:#FF5A70; --stuck:#A98BFF;
   --eye:#F4F6FB; --pupil:#0E1220; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.25); color-scheme:dark;
 }}
+:root[data-theme="dark"]{
+  --bg:#0E1220; --panel:#161B2B; --ink:#EDF0F7; --muted:#99A2B7; --line:#262D42; --soft:#1D2335;
+  --accent:#7D8CFF; --work:#4DA0FF; --need:#FFAC45; --done:#34C987; --sleep:#6F7890; --tired:#FF5A70; --stuck:#A98BFF;
+  --eye:#F4F6FB; --pupil:#0E1220; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.25); color-scheme:dark;
+}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 var(--body)}
@@ -154,10 +159,6 @@ main{padding-block:18px 60px}
 .days i.old{background:var(--tired)}
 .days i.off{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}
 .days i.off.old{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--tired) 55%,transparent)}
-.sortbar{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:13.5px;color:var(--muted)}
-.sortbar b{color:var(--ink)}
-.pill-btn{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:5px 12px;font-weight:600;font-size:13px}
-.pill-btn:hover{border-color:var(--accent);color:var(--accent)}
 .sleep-room{background:var(--soft);border-radius:22px;padding:16px}
 .sleep-row{display:flex;flex-wrap:wrap;gap:10px}
 .nap{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:8px 10px 8px 12px;min-width:0;max-width:100%}
@@ -282,19 +283,6 @@ dialog pre{background:var(--soft);padding:10px;border-radius:10px;overflow:auto;
 .toast.show{opacity:1;transform:translateX(-50%);pointer-events:auto}
 .toast button{background:transparent;border:1px solid currentColor;color:inherit;border-radius:8px;padding:2px 8px;font-size:13px}
 
-/* ---------- Spaces: Work and Personal never share the screen ---------- */
-body[data-space="personal"]{--accent:#E0529C}
-@media (prefers-color-scheme: dark){body[data-space="personal"]{--accent:#FF7EBB}}
-.space{display:flex;background:var(--soft);border-radius:14px;padding:3px;gap:2px;border:1px solid var(--line)}
-.space button{border:0;background:transparent;border-radius:11px;padding:7px 14px;font-weight:700;font-size:14px;color:var(--muted);display:flex;align-items:center;gap:7px}
-.space button .d{width:9px;height:9px;border-radius:50%;background:currentColor;opacity:.5}
-.space button.on{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
-.space button.on .d{opacity:1;background:var(--accent)}
-.space-note{font-size:12px;color:var(--muted);white-space:nowrap}
-.guard{display:flex;align-items:center;gap:8px;background:color-mix(in srgb,var(--accent) 12%,var(--panel));border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));
-  border-radius:14px;padding:8px 12px;margin:0 0 12px;font-size:13.5px}
-.guard b{color:var(--accent)}
-
 /* ---------- Step 2: live effects ---------- */
 .fx-layer{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
 .fly{position:fixed;width:26px;height:26px;margin-left:-13px;border-radius:50%;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);
@@ -324,7 +312,7 @@ body.has-river main{padding-bottom:90px}
 .menu .on-off.on{background:var(--done);color:#fff}
 
 /* ---------- Step 3: TV mode (full screen, big characters, nothing to read) ---------- */
-body.tv .bar1 > :not(.brand):not(.live), body.tv #sleep, body.tv .sortbar, body.tv .room-h .chip, body.tv .usage .tok small{display:none}
+body.tv .bar1 > :not(.brand):not(.live), body.tv #sleep, body.tv .room-h .chip, body.tv .usage .tok small{display:none}
 body.tv .top{position:static;border:0;background:transparent;backdrop-filter:none}
 body.tv .wrap{max-width:none;padding-inline:3vw}
 body.tv .cnt{padding:14px 18px}
@@ -363,11 +351,6 @@ body.tv .tv-exit{display:flex}
   <div class="bar1">
     <div class="brand"><div class="buddy m-work" style="--c:var(--b3)"><span class="eyes"><i class="eye"></i><i class="eye"></i></span></div><span>Agent Board</span></div>
     <span class="live" id="live" title="Live"></span>
-    <div class="space" id="spaceSw" role="tablist" aria-label="Space">
-      <button role="tab" data-space="work"><span class="d"></span><span data-t="work">Work</span></button>
-      <button role="tab" data-space="personal"><span class="d"></span><span data-t="personal">Personal</span></button>
-    </div>
-    <span class="space-note" id="spaceNote"></span>
     <div class="grow"></div>
     <input class="search" id="q" type="search" placeholder="Find an agent…" data-tp="search_ph" aria-label="Find an agent">
     <button class="hbtn search-btn" id="searchBtn" aria-label="Search">⌕</button>
@@ -388,10 +371,10 @@ body.tv .tv-exit{display:flex}
   <hr>
   <button id="mSound"><span class="g">♪</span><span data-t="m_sound">Sounds</span><span class="on-off" id="soundState">off</span></button>
   <button id="mRiver"><span class="g">≋</span><span data-t="m_river">Activity river</span><span class="on-off" id="riverState">on</span></button>
+  <label><span class="g">◑</span><span data-t="m_theme">Theme</span><select id="themeSel" style="margin-left:auto"><option value="auto" data-t="theme_auto">Auto</option><option value="light" data-t="theme_light">Light</option><option value="dark" data-t="theme_dark">Dark</option></select></label>
   <label><span class="g">文</span><span data-t="m_lang">Language</span><select id="langSel" style="margin-left:auto"><option value="auto" data-t="lang_auto">Auto</option><option value="en">English</option><option value="ko">한국어</option></select></label>
 </div>
 
-<div class="wrap"><div class="guard" id="guard" hidden></div></div>
 <main class="wrap" id="rooms"><div class="empty" data-t="loading">Loading…</div></main>
 
 <div class="river" id="river"><span class="lbl"><i></i><span data-t="live">Live</span></span><div class="track" id="riverTrack"><span class="river-empty" data-t="river_empty">Activity from your agents will flow here.</span></div></div>
@@ -429,10 +412,10 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;
 const I18N = {
   en: {
     search_ph:"Find an agent…", tabs:"Tabs", tabs_title:"Find your Chrome tabs", more:"More",
-    work:"Work", personal:"Personal", unsorted:"Unsorted", chrome:"Chrome", sleep_corner:"Sleep corner",
+    chrome:"Chrome", sleep_corner:"Sleep corner",
     m_report:"Report a Chrome agent", m_digest:"Copy digest", m_usage:"Usage details", m_tv:"TV mode", m_trash:"Trash",
     m_show:"Show", d1:"24 hours", d3:"3 days", d7:"7 days", d30:"30 days", m_scratch:"Scratch sessions",
-    m_sound:"Sounds", m_river:"Activity river", m_lang:"Language", lang_auto:"Auto", on:"on", off:"off",
+    m_sound:"Sounds", m_river:"Activity river", m_lang:"Language", lang_auto:"Auto", m_theme:"Theme", theme_auto:"Auto", theme_light:"Light", theme_dark:"Dark", on:"on", off:"off",
     loading:"Loading…", live:"Live", river_empty:"Activity from your agents will flow here.", exit_tv:"✕ Exit TV",
     r_title:"Report a Chrome agent", r_note:"For agents that don't write Claude Code logs, like Claude in Chrome. Same name = same tile.",
     r_agent:"Agent name", r_project:"Project", r_status:"Status", r_msg:"What was done", r_link:"Link",
@@ -443,15 +426,15 @@ const I18N = {
     c_need:"needs you", c_work:"working", c_done:"done", c_tired:"to restart", c_sleep:"asleep", show_only:"Show only: {x}",
     tokens_today:"tokens today", five:"5h", week:"week", resets_in:"resets in {t}", resetting:"resetting",
     u_d:"d", u_h:"h", u_m:"m", now:"now", ago:"{t} ago", context:"context", day:"Day {n}",
-    notifying:"notifying", quiet_until:"quiet until {t}", quiet_title:"Personal notifications only {a}–{b}", n_restart:"{n} to restart",
-    sort_is:"is", chrome_chip:"◎ claude.ai tabs · click to jump", jump_title:"click to jump to this tab",
+    n_restart:"{n} to restart",
+    chrome_chip:"◎ claude.ai tabs · click to jump", jump_title:"click to jump to this tab",
     sleep_chip:"unused 24h+ · keep or delete", keep:"Keep", del:"Delete", hide:"Hide", hide_title:"Desktop app session: delete it in the app",
     empty_match:"No agent matches.", empty_none:"No agents yet. Start Claude Code and they'll appear here.",
     open_x:"↗ Open {x}", jump:"⇥ Jump to tab", resume:"›_ Resume", resume_copied:"Resume command copied: paste it in a terminal",
     fresh:"✦ Fresh start", del_btn:"✕ Delete", files:"files", commands:"commands", pages:"pages", helpers:"helpers",
     tired_msg:"Tired: {why}. Start fresh to save tokens.", ctx_day:"context · day {n}", t_more:"More", task:"Task",
     latest:"Latest update", links:"Links", files_h:"Files", helpers_h:"Helpers", running:"running", finished:"finished",
-    session:"Session", room:"Room", log:"Log", prompts:"prompts",
+    session:"Session", log:"Log", prompts:"prompts",
     five_limit:"5-hour limit", week_limit:"Weekly limit", as_of:"as of {t}", full_usage:"Full usage page ↗",
     plan_later:"Plan limits appear after your next message in Claude Code.",
     chrome_limits:"Its limits live on claude.ai. This opens them in the right Chrome profile.", open_usage:"Open usage ↗",
@@ -465,19 +448,17 @@ const I18N = {
     sh_agent:"Agent", sh_usage:"Usage", sh_tabs:"Chrome tabs", sh_trash:"Trash",
     gone:"That agent is no longer on the board", live_upd:"Live · updated {t}", unreachable:"Board server not reachable",
     undo:"Undo", wrong:"Something went wrong", moved_trash:"Moved to trash", kept:"Kept. It won't be flagged again until it's idle again.",
-    hidden:"Hidden", restored:"Restored", moved_to:"Moved to {x}", clip_fail:"Couldn't access the clipboard", back_work:"Back to Work",
-    switched_open:"Switched to the open tab", opened_chrome:"Opened in Chrome", switched_tab:"Switched to the tab",
+    hidden:"Hidden", restored:"Restored", clip_fail:"Couldn't access the clipboard", switched_open:"Switched to the open tab", opened_chrome:"Opened in Chrome", switched_tab:"Switched to the tab",
     handoff_copied:"Handoff copied: paste it into a new Claude session", copied:"Copied", digest_copied:"Digest copied as Markdown",
     instr_copied:"Instructions copied", saved:"Saved",
-    guard:"<b>Personal</b> during work hours. It switches back to Work after 10 minutes without activity.",
-    until:"until {t}", auto_sw:"auto · switches {t}", lang_set:"Language: {x}",
+    lang_set:"Language: {x}",
   },
   ko: {
     search_ph:"에이전트 찾기…", tabs:"탭", tabs_title:"Chrome 탭 찾기", more:"더보기",
-    work:"업무", personal:"개인", unsorted:"미분류", chrome:"Chrome", sleep_corner:"쉬는 에이전트",
+    chrome:"Chrome", sleep_corner:"쉬는 에이전트",
     m_report:"Chrome 에이전트 보고", m_digest:"요약 복사", m_usage:"사용량 자세히", m_tv:"TV 모드", m_trash:"휴지통",
     m_show:"기간", d1:"24시간", d3:"3일", d7:"7일", d30:"30일", m_scratch:"임시 세션",
-    m_sound:"소리", m_river:"활동 흐름", m_lang:"언어", lang_auto:"자동", on:"켜짐", off:"꺼짐",
+    m_sound:"소리", m_river:"활동 흐름", m_lang:"언어", lang_auto:"자동", m_theme:"테마", theme_auto:"자동", theme_light:"밝게", theme_dark:"어둡게", on:"켜짐", off:"꺼짐",
     loading:"불러오는 중…", live:"실시간", river_empty:"에이전트의 활동이 여기에 흘러가요.", exit_tv:"✕ TV 끄기",
     r_title:"Chrome 에이전트 보고", r_note:"Claude in Chrome처럼 Claude Code 기록이 없는 에이전트용이에요. 이름이 같으면 같은 타일이에요.",
     r_agent:"에이전트 이름", r_project:"프로젝트", r_status:"상태", r_msg:"한 일", r_link:"링크",
@@ -488,15 +469,15 @@ const I18N = {
     c_need:"확인 필요", c_work:"작업 중", c_done:"완료", c_tired:"새로 시작", c_sleep:"잠듦", show_only:"{x}만 보기",
     tokens_today:"오늘 토큰", five:"5시간", week:"주간", resets_in:"{t} 후 초기화", resetting:"초기화 중",
     u_d:"일", u_h:"시간", u_m:"분", now:"방금", ago:"{t} 전", context:"컨텍스트", day:"{n}일째",
-    notifying:"알림 켜짐", quiet_until:"{t}까지 조용", quiet_title:"개인 알림은 {a}–{b}에만 와요", n_restart:"{n}개 새로 시작 필요",
-    sort_is:"프로젝트는", chrome_chip:"◎ claude.ai 탭 · 눌러서 이동", jump_title:"눌러서 이 탭으로 이동",
+    n_restart:"{n}개 새로 시작 필요",
+    chrome_chip:"◎ claude.ai 탭 · 눌러서 이동", jump_title:"눌러서 이 탭으로 이동",
     sleep_chip:"24시간+ 미사용 · 유지 또는 삭제", keep:"유지", del:"삭제", hide:"숨기기", hide_title:"데스크톱 앱 세션이에요. 앱에서 삭제하세요",
     empty_match:"맞는 에이전트가 없어요.", empty_none:"아직 에이전트가 없어요. Claude Code를 시작하면 여기에 나타나요.",
     open_x:"↗ {x} 열기", jump:"⇥ 탭으로 이동", resume:"›_ 이어서 하기", resume_copied:"이어서 하기 명령을 복사했어요. 터미널에 붙여 넣으세요",
     fresh:"✦ 새로 시작", del_btn:"✕ 삭제", files:"파일", commands:"명령", pages:"페이지", helpers:"도우미",
     tired_msg:"지침: {why}. 새로 시작하면 토큰을 아낄 수 있어요.", ctx_day:"컨텍스트 · {n}일째", t_more:"더보기", task:"작업",
     latest:"최근 소식", links:"링크", files_h:"파일", helpers_h:"도우미", running:"실행 중", finished:"완료",
-    session:"세션", room:"방", log:"기록", prompts:"요청",
+    session:"세션", log:"기록", prompts:"요청",
     five_limit:"5시간 한도", week_limit:"주간 한도", as_of:"{t} 기준", full_usage:"전체 사용량 페이지 ↗",
     plan_later:"Claude Code에서 메시지를 한 번 보내면 요금제 한도가 나타나요.",
     chrome_limits:"한도는 claude.ai에 있어요. 맞는 Chrome 프로필에서 열어 드려요.", open_usage:"사용량 열기 ↗",
@@ -510,12 +491,10 @@ const I18N = {
     sh_agent:"에이전트", sh_usage:"사용량", sh_tabs:"Chrome 탭", sh_trash:"휴지통",
     gone:"이 에이전트는 더 이상 보드에 없어요", live_upd:"실시간 · {t} 업데이트", unreachable:"보드 서버에 연결할 수 없어요",
     undo:"되돌리기", wrong:"문제가 생겼어요", moved_trash:"휴지통으로 옮겼어요", kept:"유지했어요. 다시 쉬기 전까지는 알리지 않아요.",
-    hidden:"숨겼어요", restored:"복원했어요", moved_to:"{x}(으)로 옮겼어요", clip_fail:"클립보드에 접근할 수 없어요", back_work:"업무로 돌아왔어요",
-    switched_open:"열린 탭으로 이동했어요", opened_chrome:"Chrome에서 열었어요", switched_tab:"탭으로 이동했어요",
+    hidden:"숨겼어요", restored:"복원했어요", clip_fail:"클립보드에 접근할 수 없어요", switched_open:"열린 탭으로 이동했어요", opened_chrome:"Chrome에서 열었어요", switched_tab:"탭으로 이동했어요",
     handoff_copied:"인계 내용을 복사했어요. 새 Claude 세션에 붙여 넣으세요", copied:"복사했어요", digest_copied:"요약을 마크다운으로 복사했어요",
     instr_copied:"지침을 복사했어요", saved:"저장했어요",
-    guard:"업무 시간에 <b>개인</b> 공간을 보고 있어요. 10분 동안 활동이 없으면 업무로 돌아가요.",
-    until:"{t}까지", auto_sw:"자동 · {t}에 전환", lang_set:"언어: {x}",
+    lang_set:"언어: {x}",
   },
 };
 let LANG = "en", LANG_SETTING = "auto";
@@ -543,8 +522,8 @@ const MOOD = {
 const ICON = {prompt:"›", edit:"✎", run:"$", agent:"⑂", skill:"✦", web:"↗", publish:"⇪", ask:"?", tool:"·", report:"•"};
 
 let data = [], usage = null, trash = [], tabsData = null, tabsErr = "", now = Date.now()/1000;
-let moodFilter = "", sheet = {kind: "", id: ""}, lastSig = "", lastOk = 0, personalHours = null, windowOpen = false;
-let tabScope = "claude", tabProfile = "", spaceInfo = null;
+let moodFilter = "", sheet = {kind: "", id: ""}, lastSig = "", lastOk = 0;
+let tabScope = "claude", tabProfile = "";
 try { $("#scratch").checked = localStorage.getItem("ab-scratch") === "1"; } catch {}
 
 // ---------- helpers ----------
@@ -675,10 +654,9 @@ function room(key, title, list, extra = ""){
   if (!list.length && !extra) return "";
   const order = {need:0, work:1, stuck:2, done:3, tired:4, rest:5, sleep:6};
   list.sort((a, b) => order[mood(a)] - order[mood(b)] || b.last_activity - a.last_activity);
-  const quiet = key === "personal" && personalHours ? `<span class="chip" title="${t("quiet_title", {a: personalHours.from, b: personalHours.to})}">♪ ${windowOpen ? t("notifying") : t("quiet_until", {t: personalHours.from})}</span>` : "";
   const heavy = list.filter(s => mood(s) === "tired").length;
   return `<section class="room" data-room="${key}">
-    <div class="room-h"><h2>${title}</h2><span class="cnum">${list.length}</span>${quiet}${heavy ? `<span class="chip warn">${t("n_restart", {n: heavy})}</span>` : ""}</div>
+    <div class="room-h"><h2>${title}</h2><span class="cnum">${list.length}</span>${heavy ? `<span class="chip warn">${t("n_restart", {n: heavy})}</span>` : ""}</div>
     ${extra}
     <div class="grid">${list.map(tile).join("")}</div>
   </section>`;
@@ -687,12 +665,12 @@ let tileCache = new Map();
 function renderRooms(){
   const all = shown().filter(matches);
   const awake = all.filter(s => !s.stale), asleep = all.filter(s => s.stale);
-  const by = c => awake.filter(s => s.category === c);
-  // Unsorted: one "Work / Personal?" question per project folder.
-  const uns = by("unsorted"), keys = [...new Map(uns.filter(s => !s.is_scratch && s.classify_key).map(s => [s.classify_key, s])).values()];
-  const ask = keys.map(s => `<div class="sortbar"><b>${esc(s.project)}</b> ${t("sort_is")}<button class="pill-btn" data-key="${esc(s.classify_key)}" data-cat="work">${t("work")}</button><button class="pill-btn" data-key="${esc(s.classify_key)}" data-cat="personal">${t("personal")}</button></div>`).join("");
   const claudeTabs = (tabsData || []).filter(t => t.claude);
-  let html = room("work", t("work"), by("work")) + room("personal", t("personal"), by("personal")) + room("unsorted", t("unsorted"), uns, ask);
+  // One room per project, the most recently active project first.
+  const latest = {};
+  awake.forEach(s => { latest[s.project] = Math.max(latest[s.project] || 0, s.last_activity); });
+  let html = Object.keys(latest).sort((a, b) => latest[b] - latest[a])
+    .map(p => room(p, esc(p), awake.filter(s => s.project === p))).join("");
   if (claudeTabs.length) html += `<section class="room" data-room="chrome"><div class="room-h"><h2>Chrome</h2><span class="cnum">${claudeTabs.length}</span><span class="chip">${t("chrome_chip")}</span></div>
     <div class="grid">${claudeTabs.map(chromeTile).join("")}</div></section>`;
   if (asleep.length) html += `<section class="room" id="sleep"><div class="room-h"><h2>${t("sleep_corner")}</h2><span class="cnum">${asleep.length}</span><span class="chip">${t("sleep_chip")}</span></div>
@@ -750,8 +728,7 @@ function agentSheet(s){
       ${(s.links || []).length > 1 ? `<h4>${t("links")}</h4><div class="row2">${s.links.map(u => `<a class="mini-btn open-link" href="${esc(u)}">${esc(linkLabel(u))} ↗</a>`).join("")}</div>` : ""}
       ${projFiles.length ? `<h4>${t("files_h")}</h4><ul class="files">${projFiles.map(x => `<li title="${esc(x.path)}">${esc(x.path)} <em>×${x.edits}</em></li>`).join("")}</ul>` : ""}
       ${s.subagents.length ? `<h4>${t("helpers_h")}</h4><div class="subs">${s.subagents.map(a => `<div class="sub"><b>${esc(a.description)}</b> · ${a.running ? t("running") : t("finished")}${a.summary ? `<small>${esc(firstSentence(a.summary, 160))}</small>` : ""}</div>`).join("")}</div>` : ""}
-      <h4>${t("session")}</h4><div class="kv"><code>${esc(s.cwd || s.project)}</code><span>${esc(s.source)}${s.model ? " · " + esc(s.model) : ""}${s.cost != null ? ` · $${s.cost.toFixed(2)}` : ""}</span>
-        ${s.classify_key && !s.is_scratch ? `<span class="row2">${t("room")}: <select id="moveSel" data-key="${esc(s.classify_key)}">${["work","personal","unsorted"].map(k => `<option value="${k}" ${s.category === k ? "selected" : ""}>${t(k)}</option>`).join("")}</select></span>` : ""}</div>
+      <h4>${t("session")}</h4><div class="kv"><code>${esc(s.cwd || s.project)}</code><span>${esc(s.source)}${s.model ? " · " + esc(s.model) : ""}${s.cost != null ? ` · $${s.cost.toFixed(2)}` : ""}</span></div>
       <h4>${t("log")} (${s.timeline.length})</h4><ul class="tl">${tl.map(e => `<li class="${e.kind}"><span class="k">${ICON[e.kind] || "·"}</span><span>${esc(e.text)}</span><span class="w">${ago(e.ts)}</span></li>`).join("")}</ul>
     </details>`;
 }
@@ -830,9 +807,7 @@ async function load(){
   try {
     const j = await (await fetch(`/api/sessions?days=${$("#days").value}`)).json();
     if (j.lang && (j.lang !== LANG || j.language !== LANG_SETTING)) { LANG = j.lang; LANG_SETTING = j.language || "auto"; applyStatic(); applyPrefs(); lastSig = ""; }
-    personalHours = j.personal_hours; windowOpen = j.personal_window_open; trash = j.trash || []; usage = j.usage || null;
-    if (!spaceInfo || spaceInfo.space !== j.space.space) spaceChanged(j.space); else spaceInfo = j.space;
-    renderSpace();
+    trash = j.trash || []; usage = j.usage || null;
     lastOk = Date.now(); $("#live").classList.remove("off"); $("#live").title = t("live_upd", {t: new Date().toLocaleTimeString(LOCALE())});
     const sig = JSON.stringify(j.sessions) + trash.length + JSON.stringify(usage);
     if (sig !== lastSig || Math.floor(Date.now() / 60000) !== Math.floor(now / 60)) { data = j.sessions; now = j.now; lastSig = sig; render(); animateChanges(); }
@@ -866,10 +841,6 @@ async function act(kind, id){
   lastSig = ""; load();
 }
 async function restore(id){ try { await post("/api/trash/restore", {id}); toast(t("restored")); } catch (e) { toast(e.message); } lastSig = ""; await load(); }
-async function classify(key, category){
-  try { await post("/api/classify", {key, category}); toast(t("moved_to", {x: t(category)})); } catch (e) { toast(e.message); }
-  lastSig = ""; load();
-}
 async function copy(text, msg){
   try { await navigator.clipboard.writeText(text); toast(msg); }
   catch {   // inside the Agent Board app window, the app copies for us
@@ -894,40 +865,6 @@ function digest(){
   }
   return lines.join("\n");
 }
-
-// ---------- Spaces ----------
-// The server only sends the current space's agents, tabs and accounts; switching swaps everything at once.
-function spaceChanged(info){
-  const first = !spaceInfo; spaceInfo = info;
-  document.body.dataset.space = info.space;
-  if (first) return;
-  seen = null; riverItems.length = 0; $("#riverTrack").innerHTML = `<span class="river-empty">${t("river_empty")}</span>`;
-  tabsData = null; tabProfile = ""; moodFilter = ""; lastSig = "";
-  if (sheet.kind) closeSheet();
-  loadTabs();
-}
-function renderSpace(){
-  if (!spaceInfo) return;
-  document.querySelectorAll("#spaceSw button").forEach(b => b.classList.toggle("on", b.dataset.space === spaceInfo.space));
-  const until = new Date(spaceInfo.until * 1000).toLocaleTimeString(LOCALE(), {hour: "2-digit", minute: "2-digit"});
-  $("#spaceNote").textContent = spaceInfo.manual ? t("until", {t: until}) : t("auto_sw", {t: until});
-  const guarded = spaceInfo.space === "personal" && spaceInfo.auto === "work";
-  $("#guard").hidden = !guarded;
-  if (guarded) $("#guard").innerHTML = t("guard");
-}
-async function switchSpace(space){
-  try { const info = await post("/api/space", {space: space === spaceInfo?.auto ? "auto" : space}); spaceChanged(info); renderSpace(); lastSig = ""; await load(); }
-  catch (e) { toast(e.message); }
-}
-// Privacy guard: Personal opened during work hours closes itself after 10 idle minutes.
-let lastActive = Date.now();
-["pointermove", "keydown", "click", "scroll", "touchstart"].forEach(ev => addEventListener(ev, () => { lastActive = Date.now(); }, {passive: true}));
-setInterval(() => {
-  if (spaceInfo && spaceInfo.space === "personal" && spaceInfo.auto === "work" && Date.now() - lastActive > 10 * 60 * 1000) {
-    switchSpace("work"); toast(t("back_work"));
-  }
-}, 15000);
-document.addEventListener("visibilitychange", () => { if (document.hidden) lastActive = Math.min(lastActive, Date.now()); });
 
 // ---------- Step 2: alive ----------
 const prefs = {sound: false, river: true};
@@ -1020,13 +957,12 @@ document.addEventListener("click", async e => {
   if (link && !e.metaKey && !e.ctrlKey) { e.preventDefault();
     try { const j = await post("/api/tabs/open", {url: link.href}); toast(j.result === "focused" ? t("switched_open") : t("opened_chrome")); }
     catch { window.open(link.href, "_blank", "noopener"); } return; }
-  const el = tgt.closest("[data-act],[data-open],[data-w],[data-mood],[data-key],[data-handoff],[data-copy],[data-usage],[data-uprof],[data-restore],[data-scope],[data-prof],#usageBtn,#emptyTrash");
+  const el = tgt.closest("[data-act],[data-open],[data-w],[data-mood],[data-handoff],[data-copy],[data-usage],[data-uprof],[data-restore],[data-scope],[data-prof],#usageBtn,#emptyTrash");
   if (!el) return;
   if (el.dataset.act) return act(el.dataset.act, el.dataset.id);
   if (el.dataset.open) { if (document.body.classList.contains("tv")) return; return openSheet("agent", el.dataset.open); }
   if (el.dataset.w) { try { await post("/api/tabs/focus", {window: +el.dataset.w, tab: +el.dataset.t}); toast(t("switched_tab")); } catch (err) { toast(err.message); } return; }
   if (el.dataset.mood) { moodFilter = moodFilter === el.dataset.mood ? "" : el.dataset.mood; renderNow(); renderRooms(); return; }
-  if (el.dataset.key && el.dataset.cat) return classify(el.dataset.key, el.dataset.cat);
   if (el.dataset.handoff) { const s = data.find(x => x.id === el.dataset.handoff); return copy(handoff(s), t("handoff_copied")); }
   if (el.dataset.copy) return copy(el.dataset.copy, el.dataset.msg || t("copied"));
   if (el.dataset.uprof) { try { await post("/api/open-in-profile", {url: "https://claude.ai/settings/usage", profile: el.dataset.uprof}); toast(t("opened_chrome")); } catch (err) { toast(err.message); } return; }
@@ -1047,19 +983,23 @@ document.addEventListener("keydown", e => {
 });
 document.addEventListener("toggle", e => { if (e.target.id === "moreD") sheet.more = e.target.open; }, true);
 document.addEventListener("input", e => { if (e.target.id === "tabQ") renderSheet(true); });
-document.addEventListener("change", e => { if (e.target.id === "moveSel") classify(e.target.dataset.key, e.target.value); });
 $("#q").addEventListener("input", renderRooms);
 $("#searchBtn").addEventListener("click", () => { $("#q").classList.toggle("show"); $("#q").focus(); });
 $("#scrim").addEventListener("click", closeSheet);
 $("#sheetX").addEventListener("click", closeSheet);
 $("#tabsBtn").addEventListener("click", () => openSheet("tabs"));
-$("#spaceSw").addEventListener("click", e => { const b = e.target.closest("[data-space]"); if (b && b.dataset.space !== spaceInfo?.space) switchSpace(b.dataset.space); });
 $("#moreBtn").addEventListener("click", () => { const m = $("#menu"); m.hidden = !m.hidden; $("#moreBtn").setAttribute("aria-expanded", String(!m.hidden)); });
 $("#mReport").addEventListener("click", () => { $("#menu").hidden = true; $("#dlg").showModal(); });
 $("#mDigest").addEventListener("click", () => { $("#menu").hidden = true; copy(digest(), t("digest_copied")); });
 $("#mUsage").addEventListener("click", () => { $("#menu").hidden = true; openSheet("usage"); });
 $("#mTrash").addEventListener("click", () => { $("#menu").hidden = true; openSheet("trash"); });
 $("#days").addEventListener("change", () => { lastSig = ""; load(); });
+function applyTheme(v){
+  if (v === "light" || v === "dark") document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme;
+  if ($("#themeSel")) $("#themeSel").value = v || "auto";
+}
+try { applyTheme(localStorage.getItem("ab-theme") || "auto"); } catch { applyTheme("auto"); }
+$("#themeSel").addEventListener("change", e => { try { localStorage.setItem("ab-theme", e.target.value); } catch {} applyTheme(e.target.value); });
 $("#langSel").addEventListener("change", async e => {
   try { const r = await post("/api/settings", {language: e.target.value}); LANG = r.lang; LANG_SETTING = r.language;
         applyStatic(); applyPrefs(); lastSig = ""; sheetSig = ""; await load(); renderSheet(true);

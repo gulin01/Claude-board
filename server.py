@@ -321,8 +321,6 @@ def collect_sessions(days):
             "project": "No folder" if common.is_scratch(cwd) else "Home" if os.path.normcase(os.path.normpath(cwd)) == os.path.normcase(HOME) else common.leaf(cwd) or "~",
             "cwd": cwd.replace(HOME, "~"),
             "is_scratch": common.is_scratch(cwd),
-            "category": common.category_for(cwd, cfg) or "unsorted",
-            "classify_key": cwd.replace(HOME, "~"),
             "branch": s["branch"],
             "source": source_label(s["entrypoint"]),
             "model": s["model"],
@@ -398,8 +396,6 @@ def collect_external(cutoff, now, cfg):
             "project": a["project"] or "(no project)",
             "cwd": "",
             "is_scratch": False,
-            "category": common.reported_category(a["project"], a["source"], cfg) or "unsorted",
-            "classify_key": a["project"] or "",
             "branch": None,
             "source": a["source"] or "Reported",
             "model": None,
@@ -446,7 +442,7 @@ def longevity(s, cfg, today):
             "context_warn": ctx_limit, "retire": reasons}
 
 
-def usage_summary(sessions, now, space=None):
+def usage_summary(sessions, now):
     """Tokens processed (input + cache + output, incl. sub-agents) in the last 5h / today / 7 days,
     per-day bars and the heaviest agents today; plus plan limits saved by the status line."""
     today0 = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
@@ -481,17 +477,13 @@ def usage_summary(sessions, now, space=None):
     except (OSError, ValueError):
         pass
     cfg = common.load_config()
-    if space:
-        plan = [a for a in plan if common.space_of_account(a["account"], cfg) == space]
     known = [a["account"] for a in plan]
     # Claude accounts without live meters: Claude Code accounts not seen yet, and Claude used only in a
     # Chrome profile (its Claude login can differ from the profile's Google account).
     extra = [{"label": e, "sub": "Claude Code · no data yet", "email": e} for e in (cfg.get("claude_accounts") or [])
-             if e not in known and (not space or common.space_of_account(e, cfg) == space)]
+             if e not in known]
     profs = chrome.profiles()
     for d, info in (cfg.get("claude_in_chrome") or {}).items():
-        if space and info.get("space", "personal") != space:
-            continue
         name = profs.get(d, {}).get("name") or d
         extra.append({"label": info.get("claude_email") or "Claude in Chrome", "sub": f"Chrome · {name} profile", "profile": d})
     return {"tokens": tot, "days": [{"date": d, "tokens": n} for d, n in days.items()],
@@ -515,26 +507,21 @@ def mood(s):
     return "rest"
 
 
-def space_filter(sessions, space):
-    return [s for s in sessions if common.in_space(s.get("category"), space)]
-
-
-def summary(now, space=None):
-    """Small payload for the menu-bar buddy: who needs you, who's working, plan usage (current space only)."""
+def summary(now):
+    """Small payload for the menu-bar buddy: who needs you, who's working, plan usage."""
     cfg = common.load_config()
-    space = space or common.current_space(cfg, now)
-    sessions = [s for s in space_filter(cleanup.annotate(collect_sessions(3), now), space) if not s["is_scratch"]]
+    sessions = [s for s in cleanup.annotate(collect_sessions(3), now) if not s["is_scratch"]]
     by = {}
     for s in sessions:
         by.setdefault(mood(s), []).append({"id": s["id"], "title": s["title"], "project": s["project"]})
     plan = []
-    for a in usage_summary(space_filter(collect_sessions(7), space), now, space)["plan"]:
+    for a in usage_summary(collect_sessions(7), now)["plan"]:
         rl = a.get("rate_limits") or {}
         pct = lambda k: None if not isinstance(rl.get(k), dict) else round(float(rl[k].get("used_percentage", rl[k].get("utilization", 0)) or 0))
         plan.append({"account": a["account"], "five": pct("five_hour"), "week": pct("seven_day")})
     return {"need": by.get("need", []), "work": by.get("work", []), "done": len(by.get("done", [])),
             "tired": len(by.get("tired", [])), "asleep": len(by.get("sleep", [])), "plan": plan,
-            "space": common.space_info(cfg, now), "lang": i18n.language(cfg), "labels": i18n.labels(i18n.language(cfg))}
+            "lang": i18n.language(cfg), "labels": i18n.labels(i18n.language(cfg))}
 
 
 def add_event(body):
@@ -563,7 +550,7 @@ def add_event(body):
     if label:
         # Clicking opens the page the agent is working on (e.g. its Chrome tab), else its card on the board.
         link = e["url"] or common.board_link("s=ext-" + re.sub(r"\W+", "-", e["agent"].lower()))
-        common.notify(common.reported_category(e["project"], e["source"]), f"{e['project'] or e['agent']}  ·  {label}",
+        common.notify(f"{e['project'] or e['agent']}  ·  {label}",
                       e["agent"], e["message"] or e["status"], url=link, nid="ext-" + e["agent"])
     return e
 
@@ -664,24 +651,19 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, fh.read(), "text/html")
         q = parse_qs(u.query)
         cfg = common.load_config()
-        space = q.get("space", [None])[0]
-        space = space if space in common.CATEGORIES else common.current_space(cfg)
-        if u.path == "/api/space":
-            return self._send(200, common.space_info(cfg))
         if u.path == "/api/settings":
             return self._send(200, {"language": cfg.get("language", "auto"), "lang": i18n.language(cfg)})
         if u.path == "/api/summary":
-            return self._send(200, summary(time.time(), space))
+            return self._send(200, summary(time.time()))
         if u.path == "/api/tabs":
             try:
-                # Only the Chrome profiles (Google accounts) that belong to this space.
-                tabs = [dict(t) for t in chrome.list_tabs() if common.space_of_profile(t.get("profile"), cfg) == space]
+                tabs = [dict(t) for t in chrome.list_tabs()]
             except Exception as ex:
                 return self._send(200, {"tabs": [], "error": str(ex)})
             # Tag tabs an agent used: pages it opened in Chrome, reported, or linked in its final message.
             # A tab is "active" when that agent is working now or touched Chrome in the last 30 minutes.
             now = time.time()
-            for s in space_filter(cleanup.annotate(collect_sessions(7), now), space):
+            for s in cleanup.annotate(collect_sessions(7), now):
                 live = s["status"] in ("working", "needs_you") or (now - (s.get("chrome_ts") or 0) < 1800)
                 for url in list(reversed(s.get("chrome_urls") or [])) + (s.get("links") or []):
                     t = chrome.find_tab(url, tabs)
@@ -699,25 +681,22 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/api/sessions":
             days = float(q.get("days", ["3"])[0])
             now = time.time()
-            # Only this space's agents leave the server, so the other space never reaches the page.
-            all7 = space_filter(collect_sessions(max(days, 7)), space)
-            usage = usage_summary(all7, now, space)
+            all7 = collect_sessions(max(days, 7))
+            usage = usage_summary(all7, now)
             shown = [s for s in all7 if now - s["last_activity"] < days * 86400]
-            trash = [t for t in cleanup.trash_list() if common.in_space(common.category_for(t["project"], cfg), space)]
+            trash = cleanup.trash_list()
             return self._send(200, {"now": now, "sessions": cleanup.annotate(shown, now), "usage": usage,
-                                    "trash": trash, "space": common.space_info(cfg, now),
-                                    "lang": i18n.language(cfg), "language": cfg.get("language", "auto"),
-                                    "personal_hours": cfg["personal_notify_hours"],
-                                    "personal_window_open": common.in_personal_window(cfg)})
+                                    "trash": trash,
+                                    "lang": i18n.language(cfg), "language": cfg.get("language", "auto")})
         self._send(404, {"error": "not found"})
 
     def do_POST(self):
         if not self._host_ok():
             return
         route = urlparse(self.path).path
-        if route not in ("/api/event", "/api/classify", "/api/session/keep", "/api/session/delete",
+        if route not in ("/api/event", "/api/session/keep", "/api/session/delete",
                          "/api/session/hide", "/api/trash/restore", "/api/trash/empty",
-                         "/api/tabs/focus", "/api/tabs/open", "/api/open-in-profile", "/api/space", "/api/settings"):
+                         "/api/tabs/focus", "/api/tabs/open", "/api/open-in-profile", "/api/settings"):
             return self._send(404, {"error": "not found"})
         # Refuse cross-site browser posts; allow curl/scripts and the board itself.
         origin = self.headers.get("Origin")
@@ -748,8 +727,6 @@ class Handler(BaseHTTPRequestHandler):
                 cfg["language"] = lang
                 common.save_config(cfg)
                 return self._send(200, {"language": lang, "lang": i18n.language(cfg)})
-            if route == "/api/space":
-                return self._send(200, common.set_space(str(body.get("space") or "")))
             if route == "/api/open-in-profile":
                 prof = chrome.open_in_profile(str(body.get("url") or ""), str(body.get("email") or ""), body.get("profile"))
                 return self._send(200, {"ok": True, "profile": prof})
@@ -760,9 +737,6 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, {"ok": True})
             if route == "/api/trash/empty":
                 return self._send(200, {"ok": True, "removed": cleanup.empty_trash()})
-            if route == "/api/classify":
-                key = common.set_category(body.get("key") or "", body.get("category") or "")
-                return self._send(200, {"ok": True, "key": key})
             self._send(200, {"ok": True, "event": add_event(body)})
         except Exception as ex:
             self._send(400, {"error": str(ex)})

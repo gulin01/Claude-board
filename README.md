@@ -4,7 +4,7 @@
 
 **See all your Claude agents at a glance.** Every Claude Code session (terminal, desktop app, IDE) shows up as a
 little animated character: waving = it needs you, typing = working, ✓ = done, sweating = it's grown too big and
-should be restarted. Work and personal projects are kept apart, so coworkers never see your personal ones.
+should be restarted.
 
 Runs **only on your computer**. Nothing is sent anywhere. Works on **macOS** and **Windows**
 (see [Windows](#windows) for what's different there).
@@ -13,7 +13,7 @@ Runs **only on your computer**. Nothing is sent anywhere. Works on **macOS** and
 > *"set up Agent Board for me"*. Claude reads [CLAUDE.md](CLAUDE.md), asks you the questions and installs it.
 
 ## Where your information is kept
-This folder holds **code only**. Your answers (project folders, accounts, hours) and data (logs, trash, usage)
+This folder holds **code only**. Your settings (language, accounts) and data (logs, trash, usage)
 live in a separate private folder: **macOS** `~/.agent-board/` · **Windows** `C:\Users\<you>\.agent-board\`.
 Nothing is ever sent off your computer, and nothing personal ends up in this folder.
 
@@ -34,17 +34,11 @@ git clone https://github.com/gulin01/Claude-board.git ~/agent-board
 cd ~/agent-board
 ```
 
-### 3. Run setup and answer 4 questions
+### 3. Run setup
 ```bash
 python3 setup.py
 ```
-| # | Setup asks | Type |
-|---|-----------|------|
-| 1 | **When is your personal time?** (default 20:00–08:00) | Enter to accept, or e.g. `19:00` |
-| 2 | **Each project folder you've used Claude Code in: work or personal?** | `w` work · `p` personal · `s` skip |
-| 3 | **Each Chrome profile: work or personal?** and do you use Claude there? | `w` / `p`, then `y` / `n` |
-| 4 | **Your Claude Code account: work or personal?** | `w` / `p` |
-
+Setup asks your **language** (English / 한국어) and whether you use Claude in each Chrome profile.
 Then it installs everything by itself: Claude Code hooks (your existing settings are kept and backed up),
 the **Agent Board** app, the menu-bar buddy, start-at-login, and a shortcut on your Desktop.
 
@@ -66,7 +60,6 @@ finder also works without the extension.
 Claude Desktop's **Chat** conversations aren't stored anywhere the board can read, so setup adds a small
 **Agent Board connector** to Claude Desktop instead. In your chats, Claude then shows longer tasks on the board
 (working → done, with notifications) and can answer *"what are my agents doing?"*.
-- Setup asks whether Desktop chats count as **Work** or **Personal**.
 - **Restart Claude Desktop** after setup. The first time Claude uses the connector, choose **Always allow**.
 - It only talks to the board on your computer. Older chats from before the connector don't appear.
 
@@ -77,18 +70,10 @@ Close and reopen any running Claude Code sessions so they pick up the new hooks.
 > Change your answers later: run `python3 setup.py` again (or edit `~/.agent-board/config.json`).
 > Preview without changing anything: `python3 setup.py --dry-run`.
 
-### Work vs personal, in short
-- **Two spaces, never mixed:** the board shows either **Work** or **Personal**, not both. In Work, the
-  personal projects aren't even sent to the screen.
-- **Switches by itself** at your personal hours, or use the **Work | Personal** switch at the top.
-  Opened Personal during work hours? It flips back to Work after 10 idle minutes.
-- **New project?** The first time you open Claude Code in a new folder, Claude asks *"work or personal?"*
-  and remembers. Until then it shows in an **Unsorted** room with two buttons to sort it.
-- **Notifications** for personal projects only arrive in personal hours (or while you're in Personal).
 
 ## Windows
 
-Same board, characters, Work/Personal spaces, usage and longevity. Setup is the same 4 questions.
+Same board, characters, usage and longevity. Setup asks the same questions.
 
 ### Setup on Windows
 1. **Install** (if you don't have them):
@@ -101,7 +86,7 @@ Same board, characters, Work/Personal spaces, usage and longevity. Setup is the 
    cd $HOME\agent-board
    ```
    (Git Bash: `git clone https://github.com/gulin01/Claude-board.git ~/agent-board && cd ~/agent-board`)
-3. **Run setup** and answer the 4 questions:
+3. **Run setup**:
    ```
    py setup.py
    ```
@@ -110,7 +95,7 @@ Same board, characters, Work/Personal spaces, usage and longevity. Setup is the 
 ### What's different on Windows
 | | macOS | Windows |
 |---|---|---|
-| Board, characters, Work/Personal, usage, longevity | ✅ | ✅ |
+| Board, characters, usage, longevity | ✅ | ✅ |
 | Notifications (click opens the agent) | ✅ Agent Board app | ✅ Windows notifications (shown as *Windows PowerShell*) |
 | Starts at login | ✅ login items | ✅ Startup folder |
 | Desktop icon | ✅ Mac app window | ✅ Chrome/Edge app window |
@@ -137,7 +122,6 @@ Remove it with `py setup.py --uninstall`.
 | No plan usage (5-hour / weekly %) | Send one message in Claude Code; it updates from Claude Code's status line |
 | “Starting Agent Board…” stays / page won't load | Run setup again, or start the board by hand: `python3 server.py` (Windows: `py server.py`) |
 | Chrome tabs missing | System Settings → Privacy & Security → Automation → python3 → turn on Google Chrome |
-| A project is in the wrong space | Open the agent → **More** → Room, or `python3 classify.py <folder> work` |
 
 ### Remove it
 ```bash
@@ -175,12 +159,6 @@ In this section `config.json` and `data/` mean the files in your private setting
 
 Environment options: `AGENT_BOARD_PORT` (default 4317) and `AGENT_BOARD_PROJECTS` (default `~/.claude/projects`).
 
-## Work / Personal
-Each project folder is sorted as **Work** or **Personal** in `config.json` (the board has a tab for each).
-- A new, unsorted project: Claude asks "work or personal?" at the start of the first session there
-  (SessionStart hook) and saves the answer. You can also sort or move projects from the board's
-  **Unsorted** tab, or run `python3 classify.py <folder> work|personal`.
-- Subfolders follow their parent (`~/code/acme-app/docs` counts as work).
 
 ## Notifications
 macOS notifications come from Claude Code hooks in `~/.claude/settings.json` (setup adds them).
@@ -198,20 +176,18 @@ or, if the agent left a link (a preview, a PR), that page in Chrome.
 To keep notifications on screen until you close them: System Settings → Notifications → **Agent Board**
 → set the style to **Persistent** (Alerts). The browser is `browser` in `config.json` (empty = default browser).
 
-- **Work** and unsorted projects: notify any time.
-- **Personal** projects: only between `personal_notify_hours` (20:00–08:00). Daytime ones are dropped
-  (you can still see the sessions on the Personal tab).
+- Every finished task, question or permission prompt notifies you.
 - Reported agents (report.sh / + Report) notify when their status is `done`, `needs_input` or `blocked`.
 - Every decision is logged in `data/notify.log` (SENT / SKIP with the reason).
 
-To change the hours or sound (`Glass`, `Ping`, `Hero`…), edit `config.json`.
+To change the sound (`Glass`, `Ping`, `Hero`…), edit `config.json`.
 To turn notifications off, remove the `hooks` block from `~/.claude/settings.json`.
 If no banners appear: System Settings → Notifications → **Agent Board** → Allow notifications.
 
 ## Idle agents (24 h cleanup)
 Every 30 minutes the board looks for agents with no activity for `stale_after_hours` (24).
 - You get **one** grouped notification, e.g. "💤 2 idle agents · Unused for 24h+ · keep or delete on Agent Board".
-  Personal projects follow the same 8 pm–8 am rule. Each agent is only mentioned once per idle stretch.
+  Each agent is only mentioned once per idle stretch.
 - The board shows a **💤 Idle for 24h+** panel with **Keep** (stop asking until it's used and goes idle again)
   and **Delete**.
 - **Delete** moves the session's files into `data/trash/`. It disappears from the board and from `claude --resume`.
@@ -279,7 +255,8 @@ On wide screens a panel stays pinned on the right; on narrow ones it becomes pil
   happy ✓ = done, sweating = tired (too old or too big, start fresh), ? = stuck, asleep = unused 24h.
   Battery = context size, squares = days alive, badge = where it runs (>_ terminal, ▢ desktop app, ◎ Chrome).
 - **Now bar:** tap a counter to highlight those agents; tap the usage rings for usage details.
-- **Rooms:** Work, Personal, Unsorted (sort with one tap), Chrome (claude.ai tabs), Sleep corner.
+- **Rooms:** one room per project, plus Chrome (claude.ai tabs) and the Sleep corner.
+- **Theme:** More ⋯ → Theme: Auto (follow the computer), Light or Dark.
 - **Tap an agent** for its details panel: counts, one-line update, Open / Jump to tab / Resume / Fresh start / Delete.
 - **Alive:** tool bubbles as agents work, confetti when one finishes, an activity river at the bottom.
   Sounds (off by default) and the river are in **More**.
@@ -287,15 +264,6 @@ On wide screens a panel stays pinned on the right; on narrow ones it becomes pil
 - **Menu-bar buddy:** `menubar/build.sh` builds it; it starts at login via
   `~/Library/LaunchAgents/com.agent-board.menubar.plist`. Amber and waving = someone needs you.
 
-## Work and Personal spaces
-Only one space is on screen at a time: the board, Chrome tabs, usage, trash, TV mode, the activity river and the
-menu-bar buddy all show just the current space. The server doesn't even send the other space to the page.
-- **Automatic:** Work 08:00–20:00, Personal 20:00–08:00 (`personal_notify_hours`).
-- **Manual:** the Work | Personal switch in the header or the menu-bar buddy; it lasts until the next automatic change.
-- **Privacy guard:** Personal opened during work hours switches back to Work after 10 idle minutes.
-- Chrome profiles and Claude accounts are assigned in `config.json` (`chrome_profiles`, `account_spaces`);
-  anything unassigned counts as personal. Unsorted projects show in both until sorted.
-- Personal notifications arrive in personal hours, or any time you've switched to Personal.
 
 ## The Agent Board app
 `notifier/Agent Board.app` is both the notification sender and the board window. Open it (Desktop shortcut

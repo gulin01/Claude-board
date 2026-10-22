@@ -6,8 +6,7 @@ import Cocoa
 
 struct Item: Decodable { let id: String; let title: String; let project: String }
 struct Plan: Decodable { let account: String; let five: Int?; let week: Int? }
-struct Space: Decodable { let space: String; let auto: String; let manual: Bool; let until: Double }
-struct Summary: Decodable { let need: [Item]; let work: [Item]; let done: Int; let tired: Int; let asleep: Int; let plan: [Plan]; let space: Space; let labels: [String: String]? }
+struct Summary: Decodable { let need: [Item]; let work: [Item]; let done: Int; let tired: Int; let asleep: Int; let plan: [Plan]; let labels: [String: String]? }
 
 let board = "http://127.0.0.1:4317/"
 
@@ -136,13 +135,6 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
             menu.addItem(.separator())
         }
-        // Only the current space is listed; the other one never shows here.
-        let personal = s.space.space == "personal"
-        menu.addItem(disabled(personal ? L("personal_space", "Personal space") : L("work_space", "Work space")))
-        let sw = action(personal ? L("switch_to_work", "Switch to Work") : L("switch_to_personal", "Switch to Personal"), #selector(toggleSpace))
-        sw.representedObject = personal ? (s.space.auto == "work" ? "auto" : "work") : (s.space.auto == "personal" ? "auto" : "personal")
-        menu.addItem(sw)
-        menu.addItem(.separator())
         section("● \(L("needs_you_list", "Needs you")) (\(s.need.count))", s.need)
         section("● \(L("working_list", "Working")) (\(s.work.count))", s.work)
         var line = [String]()
@@ -173,14 +165,6 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     @objc func openAgent(_ sender: NSMenuItem) { open(board + "#s=" + (sender.representedObject as? String ?? "")) }
     @objc func openBoard() { open(board) }
-    @objc func toggleSpace(_ sender: NSMenuItem) {
-        guard let url = URL(string: board + "api/space"), let space = sender.representedObject as? String else { return }
-        var req = URLRequest(url: url, timeoutInterval: 5)
-        req.httpMethod = "POST"
-        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.httpBody = try? JSONSerialization.data(withJSONObject: ["space": space])
-        URLSession.shared.dataTask(with: req) { _, _, _ in DispatchQueue.main.async { self.poll() } }.resume()
-    }
     @objc func quit() { NSApp.terminate(nil) }
 }
 

@@ -5,7 +5,7 @@ Claude Desktop starts this program and talks to it over stdin/stdout (JSON-RPC, 
 It gives Claude two tools:
   - report_progress: show this chat on Agent Board (working / done / needs you), so it appears as a tile
     and sends the usual notifications
-  - list_agents:     read what your agents are doing right now (current Work/Personal space only)
+  - list_agents:     read what your agents are doing right now
 
 It only talks to the board on this computer (http://127.0.0.1:4317). setup.py adds it to Claude Desktop's
 claude_desktop_config.json; restart Claude Desktop to load it.
@@ -53,7 +53,7 @@ TOOLS = [
         "name": "list_agents",
         "title": "What are my agents doing?",
         "description": "List the user's Claude agents from Agent Board right now: who needs them, who is working, "
-                       "how many are done or should be restarted, and plan usage. Only the current Work/Personal space.",
+                       "how many are done or should be restarted, and plan usage.",
         "inputSchema": {"type": "object", "properties": {}},
         "annotations": {"title": "What are my agents doing?", "readOnlyHint": True, "openWorldHint": False},
     },
@@ -82,8 +82,7 @@ def report_progress(a):
 
 def list_agents(_a):
     s = http("api/summary")
-    space = (s.get("space") or {}).get("space", "work")
-    lines = [f"Space: {space}"]
+    lines = []
     for key, label in (("need", "Needs the user"), ("work", "Working")):
         items = s.get(key) or []
         lines.append(f"{label} ({len(items)}):" if items else f"{label}: none")

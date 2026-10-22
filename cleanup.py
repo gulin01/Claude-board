@@ -71,7 +71,7 @@ def annotate(sessions, now):
 
 
 def check_and_notify(sessions, now=None):
-    """Send one grouped reminder per category for newly idle agents. Returns sent count."""
+    """Send one grouped reminder per project for newly idle agents. Returns sent count."""
     now = now or time.time()
     cfg = common.load_config()
     limit = stale_after_secs(cfg)
@@ -85,18 +85,13 @@ def check_and_notify(sessions, now=None):
         # One notification per project, so the project name is always the headline.
         for project in sorted({s["project"] for s in fresh}):
             group = [s for s in fresh if s["project"] == project]
-            cat = group[0]["category"]
-            ok, _ = common.should_notify(cat, cfg)
-            if not ok:
-                common.log(f"SKIP  [{cat}] {project} · 💤 {len(group)} idle  (personal project outside notify hours)")
-                continue   # try again on a later check, inside the window
             n = len(group)
             lang = i18n.language(cfg)
             title = f"{project}  ·  " + (i18n.t("idle_one", lang) if n == 1 else i18n.t("idle_many", lang, n=n))
             subtitle = ", ".join(s["title"] for s in group[:3]) + (f" +{n - 3}" if n > 3 else "")
             body = i18n.t("idle_body", lang)
-            link = common.board_link("s=" + group[0]["id"] if n == 1 else "idle=" + cat)
-            common.notify(cat, title, subtitle, body, cfg, url=link, nid="idle-" + project)
+            link = common.board_link("s=" + group[0]["id"] if n == 1 else "idle=all")
+            common.notify(title, subtitle, body, cfg, url=link, nid="idle-" + project)
             for s in group:
                 st["notified"][s["id"]] = s["last_activity"]
             sent += 1

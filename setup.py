@@ -8,14 +8,10 @@
     python3 setup.py --uninstall  # remove hooks, login items and the Desktop shortcut (keeps your data)
 
 For Claude (or scripts): no typed questions needed.
-    python3 setup.py --detect               # prints JSON: OS, what's installed, projects, Chrome profiles, account
+    python3 setup.py --detect               # prints JSON: OS, what's installed, Chrome profiles, account
     python3 setup.py --answers answers.json # installs with these answers (format: see CLAUDE.md)
 
-What it asks:
-  1. Your personal hours (personal notifications only arrive then; the board switches to Personal then)
-  2. Which of your Claude Code project folders are Work and which are Personal
-  3. Which Chrome profiles (Google accounts) are Work and which are Personal
-  4. Which Claude accounts are Work and which are Personal
+What it asks: your language, and whether you use Claude in each Chrome profile.
 What it installs (and, for the Chrome tab finder, walks you through 3 clicks in Chrome):
   - Claude Code hooks + status line in ~/.claude/settings.json (a backup is saved next to it)
   - Mac: the Agent Board app (board window + notifications) and the menu-bar buddy, if Xcode tools exist
@@ -56,7 +52,6 @@ TRAY = os.path.join(HERE, "tray", "tray.ps1")
 NOTIFIER_APP = os.path.join(HERE, "notifier", "Agent Board.app")
 MENU_APP = os.path.join(HERE, "menubar", "Agent Board Menu.app")
 DESKTOP_LINK = os.path.join(HOME, "Desktop", "Agent Board.app")
-GENERAL = {HOME, *(os.path.join(HOME, d) for d in ("Desktop", "Documents", "Downloads"))}
 
 YES = "--yes" in sys.argv
 DRY = "--dry-run" in sys.argv
@@ -77,24 +72,8 @@ KO = [(re.compile(p), r) for p, r in [
     (r"Agent Board setup", "Agent Board 설정"),
     (r"\(dry run: nothing will change\)", "(미리보기: 아무것도 바뀌지 않아요)"),
     (r"A few questions, then everything installs\. Press Enter to accept the \[default\]\.", "몇 가지 질문 후 모두 설치돼요. Enter를 누르면 [기본값]을 써요."),
-    (r"Personal hours", "개인 시간"),
-    (r"During these hours the board shows your Personal space and personal notifications can arrive\.", "이 시간에는 보드가 개인 공간을 보여 주고 개인 알림이 와요."),
-    (r"The rest of the day is Work: personal projects stay hidden from the screen\.", "나머지 시간은 업무 시간이라 개인 프로젝트가 화면에 보이지 않아요."),
-    (r"Personal time starts at", "개인 시간 시작"), (r"Personal time ends at", "개인 시간 끝"),
-    (r"Personal (\S+)–(\S+), Work the rest of the day", r"개인 \1–\2, 나머지는 업무"),
-    (r"Your project folders", "프로젝트 폴더"),
-    (r"Folders you've used Claude Code in\. Subfolders follow their parent\.", "Claude Code를 쓴 폴더들이에요. 하위 폴더는 상위 폴더를 따라가요."),
-    (r'New projects later: Claude asks you "work or personal\?" the first time you open them\.', '나중에 새 프로젝트를 열면 Claude가 처음에 "업무인가요, 개인인가요?"라고 물어봐요.'),
-    (r"\(w = work, p = personal, s = skip\)", "(w = 업무, p = 개인, s = 건너뛰기)"),
-    (r"Please type w, p or s\.", "w, p, s 중 하나를 입력하세요."),
-    (r"No Claude Code projects found yet\. That's fine: Claude will ask when you start one\.", "아직 Claude Code 프로젝트가 없어요. 괜찮아요. 새로 시작하면 Claude가 물어봐요."),
-    (r"(\d+) work profile\(s\), (\d+) personal", r"업무 프로필 \1개, 개인 \2개"),
-    (r"(\d+) work, (\d+) personal", r"업무 \1개, 개인 \2개"),
-    (r"Chrome profiles \(Google accounts\)", "Chrome 프로필 (Google 계정)"),
-    (r"Tabs from a Work profile only show in Work; anything not marked Work stays Personal\.", "업무 프로필의 탭은 업무 공간에만 보여요. 업무로 표시하지 않은 프로필은 개인이에요."),
     (r"Google Chrome not found\. Skipping \(the Chrome tab finder needs Chrome\)\.", "Google Chrome이 없어서 건너뛰어요 (탭 찾기는 Chrome이 필요해요)."),
     (r"Do you use Claude \(extension or claude\.ai\) in (.+)\? \(y/n\)", r"\1에서 Claude(확장 프로그램 또는 claude.ai)를 쓰나요? (y/n)"),
-    (r"Claude accounts", "Claude 계정"),
     (r"Claude Code is signed in as (.+)", r"Claude Code 로그인 계정: \1"),
     (r"Claude Code isn't signed in yet\. Run setup again after your first Claude Code session\.", "Claude Code에 아직 로그인하지 않았어요. 처음 Claude Code를 쓴 뒤 설정을 다시 실행하세요."),
     (r"Saved your answers in (.+) \(edit it anytime, or run setup again\)", r"답변을 \1에 저장했어요 (언제든 수정하거나 설정을 다시 실행하세요)"),
@@ -104,8 +83,10 @@ KO = [(re.compile(p), r) for p, r in [
     (r"Open Claude Code sessions pick this up after a restart", "열려 있는 Claude Code 세션은 다시 시작해야 적용돼요"),
     (r"You already have a status line \((.*)\)\. Replace it\? \(y/n\)", r"이미 상태 표시줄이 있어요 (\1). 바꿀까요? (y/n)"),
     (r"Kept your status line\. Plan usage \(5-hour / weekly %\) won't show on the board\.", "기존 상태 표시줄을 유지했어요. 보드에 요금제 사용량(5시간/주간 %)은 안 보여요."),
-    (r"6\. Apps", "6. 앱"),
-    (r" → work\b", " → 업무"), (r" → personal\b", " → 개인"),
+    (r"4\. Apps", "4. 앱"),
+    (r"Claude in Chrome", "Chrome의 Claude"),
+    (r"Claude account\b", "Claude 계정"),
+    (r"Connector added", "커넥터를 추가했어요"),
     (r"Windows: notifications use Windows' own notification center, so nothing to build", "Windows: 알림은 Windows 알림 센터를 써서 따로 만들 게 없어요"),
     (r"The tray buddy starts in the next step; the Chrome tab finder is the last step", "트레이 버디는 다음 단계에서 시작되고, Chrome 탭 찾기는 마지막 단계예요"),
     (r"Xcode command line tools not found, so the app and menu-bar buddy were skipped\.", "Xcode 명령줄 도구가 없어서 앱과 메뉴 막대 버디는 건너뛰었어요."),
@@ -133,8 +114,6 @@ KO = [(re.compile(p), r) for p, r in [
     (r"Lets Claude in your Desktop chats show tasks on the board and answer “what are my agents doing\?”\.", "데스크톱 채팅의 Claude가 작업을 보드에 보여 주고 “에이전트들 뭐 하고 있어?”에 답할 수 있어요."),
     (r"Add the Agent Board connector to Claude Desktop\? \(y/n\)", "Claude 데스크톱에 Agent Board 커넥터를 추가할까요? (y/n)"),
     (r"Claude Desktop chats are", "Claude 데스크톱 채팅은"),
-    (r"Connector added \(chats count as work\)", "커넥터를 추가했어요 (채팅은 업무로 분류)"),
-    (r"Connector added \(chats count as personal\)", "커넥터를 추가했어요 (채팅은 개인으로 분류)"),
     (r"Restart Claude Desktop to load it\. The first time Claude uses it, choose “Always allow”\.", "적용하려면 Claude 데스크톱을 다시 시작하세요. Claude가 처음 쓸 때 “항상 허용”을 고르세요."),
     (r"Claude Desktop connector removed \(restart Claude Desktop\)", "Claude 데스크톱 커넥터를 제거했어요 (Claude 데스크톱 다시 시작)"),
     (r"Done\.(.*) Open (.*)Agent Board(.*) on your Desktop, or (\S+)", r"완료!\1 바탕화면에서 \2Agent Board\3를 열거나 \4 로 접속하세요"),
@@ -172,11 +151,6 @@ def ok(msg): say(f"   {G}✓{X} {msg}")
 def warn(msg): say(f"   {Y}!{X} {msg}")
 def tilde(p): return p.replace(HOME, "~", 1)
 def posix(p): return p.replace("\\", "/")
-def under(path, folder):
-    a, b = os.path.normcase(os.path.normpath(path)), os.path.normcase(os.path.normpath(folder))
-    return a.startswith(b.rstrip("\\/") + os.sep)
-
-
 def ask(question, default=""):
     if YES:
         return default
@@ -186,15 +160,6 @@ def ask(question, default=""):
     except EOFError:
         a = ""
     return a or default
-
-
-def ask_space(label, default="p"):
-    """w / p / s(kip). Returns 'work', 'personal' or None."""
-    while True:
-        a = ask(f"{label}  {D}(w = work, p = personal, s = skip){X}", default).lower()[:1]
-        if a in ("w", "p", "s"):
-            return {"w": "work", "p": "personal", "s": None}[a]
-        say("   Please type w, p or s.")
 
 
 def write(path, text):
@@ -214,33 +179,6 @@ def run(args, check=True):
 
 
 # ---------------------------------------------------------------- discovery
-def project_folders():
-    """Folders you've used Claude Code in (most recent first), read from Claude Code's own logs."""
-    seen = {}
-    for f in glob.glob(os.path.join(CLAUDE_DIR, "projects", "*", "*.jsonl")):
-        try:
-            with open(f, encoding="utf-8", errors="replace") as fh:
-                for _ in range(60):
-                    line = fh.readline()
-                    if not line:
-                        break
-                    if '"cwd"' in line:
-                        cwd = json.loads(line).get("cwd")
-                        if cwd:
-                            seen[cwd] = max(seen.get(cwd, 0), os.path.getmtime(f))
-                            break
-        except (OSError, ValueError):
-            continue
-    out = [c for c in sorted(seen, key=seen.get, reverse=True)
-           if c not in GENERAL and "scratch-workspaces" not in c and os.path.isdir(c)]
-    # Keep top-level project folders only (subfolders follow their parent).
-    tops = []
-    for c in out:
-        if not any(under(c, t) for t in tops):
-            tops = [t for t in tops if not under(t, c)] + [c]
-    return tops[:25]
-
-
 def chrome_profiles():
     try:
         with open(CHROME_STATE, encoding="utf-8") as fh:
@@ -267,69 +205,31 @@ def configure():
                 cfg.update(json.load(fh))
         except (OSError, ValueError):
             pass
-    fresh = not os.path.exists(CONFIG)
-    if fresh:   # start from a clean slate, not the example's placeholder folders and emails
-        cfg.update(projects={}, chrome_profiles={}, account_spaces={}, claude_accounts=[], claude_in_chrome={})
     choose_language(cfg)
 
-    step(1, "Personal hours")
-    say(f"   {D}During these hours the board shows your Personal space and personal notifications can arrive.")
-    say(f"   The rest of the day is Work: personal projects stay hidden from the screen.{X}")
-    h = cfg.get("personal_notify_hours") or {"from": "20:00", "to": "08:00"}
-    h = {"from": ask("Personal time starts at", h["from"]), "to": ask("Personal time ends at", h["to"])}
-    cfg["personal_notify_hours"] = h
-    ok(f"Personal {h['from']}–{h['to']}, Work the rest of the day")
-
-    step(2, "Your project folders")
-    say(f"   {D}Folders you've used Claude Code in. Subfolders follow their parent.")
-    say(f"   New projects later: Claude asks you \"work or personal?\" the first time you open them.{X}")
-    projects = dict(cfg.get("projects") or {})
-    folders = project_folders()
-    if not folders:
-        warn("No Claude Code projects found yet. That's fine: Claude will ask when you start one.")
-    for c in folders:
-        key = tilde(c)
-        cur = projects.get(key)
-        sp = ask_space(f"{B}{key}{X}", {"work": "w", "personal": "p"}.get(cur, "s"))
-        if sp:
-            projects[key] = sp
-        else:
-            projects.pop(key, None)
-    cfg["projects"] = projects
-    ok(f"{sum(v == 'work' for v in projects.values())} work, {sum(v == 'personal' for v in projects.values())} personal")
-
-    step(3, "Chrome profiles (Google accounts)")
-    say(f"   {D}Tabs from a Work profile only show in Work; anything not marked Work stays Personal.{X}")
+    step(1, "Claude in Chrome")
     profs = chrome_profiles()
-    cp = dict(cfg.get("chrome_profiles") or {})
     cic = dict(cfg.get("claude_in_chrome") or {})
     if not profs:
         warn("Google Chrome not found. Skipping (the Chrome tab finder needs Chrome).")
     for d, (name, email) in profs.items():
-        sp = ask_space(f"{B}{name}{X} {D}{email}{X}", "w" if cp.get(d) == "work" else "p") or "personal"
-        cp[d] = sp
-        uses = ask(f"   Do you use Claude (extension or claude.ai) in {name}? (y/n)", "y" if d in cic else "n").lower().startswith("y")
+        uses = ask(f"Do you use Claude (extension or claude.ai) in {name}? (y/n)", "y" if d in cic else "n").lower().startswith("y")
         if uses:
-            cic[d] = {"space": sp, "claude_email": cic.get(d, {}).get("claude_email", "")}
+            cic[d] = {"claude_email": cic.get(d, {}).get("claude_email", "")}
         else:
             cic.pop(d, None)
-    cfg["chrome_profiles"], cfg["claude_in_chrome"] = cp, cic
-    if profs:
-        ok(f"{sum(v == 'work' for v in cp.values())} work profile(s), {sum(v == 'personal' for v in cp.values())} personal")
+    cfg["claude_in_chrome"] = cic
 
-    step(4, "Claude accounts")
+    step(2, "Claude account")
     acct = claude_code_account()
-    spaces = dict(cfg.get("account_spaces") or {})
     accounts = [a for a in (cfg.get("claude_accounts") or []) if "@" in a]
     if acct:
-        sp = ask_space(f"Claude Code is signed in as {B}{acct}{X}", "w" if spaces.get(acct, "work") == "work" else "p") or "work"
-        spaces[acct] = sp
         if acct not in accounts:
             accounts.insert(0, acct)
-        ok(f"{acct} → {sp}")
+        ok(f"Claude Code is signed in as {acct}")
     else:
         warn("Claude Code isn't signed in yet. Run setup again after your first Claude Code session.")
-    cfg["account_spaces"], cfg["claude_accounts"] = spaces, accounts
+    cfg["claude_accounts"] = accounts
 
     write(CONFIG, json.dumps(cfg, indent=2, ensure_ascii=False) + "\n")
     ok(f"Saved your answers in {tilde(CONFIG)} (edit it anytime, or run setup again)")
@@ -356,10 +256,8 @@ def detect():
         "claude_desktop_installed": os.path.isdir(DESKTOP_DIR),
         "chrome_extension_folder": EXTENSION_DIR,
         "chrome_extension_steps": [s.format(folder=EXTENSION_DIR) for s in EXTENSION_STEPS],
-        "projects": project_folders(),
         "chrome_profiles": [{"dir": d, "name": n, "email": e} for d, (n, e) in chrome_profiles().items()],
-        "current_answers": {k: current.get(k) for k in ("personal_notify_hours", "projects", "chrome_profiles",
-                                                        "claude_in_chrome", "account_spaces") if k in current},
+        "current_answers": {k: current.get(k) for k in ("language", "claude_in_chrome") if k in current},
     }, indent=2, ensure_ascii=False))
 
 
@@ -374,28 +272,14 @@ def configure_from(path):
                 cfg.update(json.load(fh))
         except (OSError, ValueError):
             pass
-    if not os.path.exists(CONFIG):
-        cfg.update(projects={}, chrome_profiles={}, account_spaces={}, claude_accounts=[], claude_in_chrome={})
-    def space(v):
-        if v not in ("work", "personal"):
-            raise SystemExit(f"Answer must be 'work' or 'personal', got {v!r}")
-        return v
     if a.get("language") in ("en", "ko", "auto"):
         cfg["language"] = a["language"]
         global LANG
         LANG = "ko" if a["language"] == "ko" else "en"
-    if "personal_hours" in a:
-        cfg["personal_notify_hours"] = {"from": a["personal_hours"]["from"], "to": a["personal_hours"]["to"]}
-    if "projects" in a:
-        cfg["projects"] = {tilde(os.path.expanduser(k)): space(v) for k, v in a["projects"].items()}
-    if "chrome_profiles" in a:
-        cfg["chrome_profiles"] = {d: space(v) for d, v in a["chrome_profiles"].items()}
     if "claude_in_chrome" in a:
-        cp = cfg.get("chrome_profiles") or {}
-        cfg["claude_in_chrome"] = {d: {"space": cp.get(d, "personal"), "claude_email": ""} for d in a["claude_in_chrome"]}
+        cfg["claude_in_chrome"] = {d: {"claude_email": ""} for d in a["claude_in_chrome"]}
     acct = claude_code_account()
-    if acct and "claude_account_space" in a:
-        cfg.setdefault("account_spaces", {})[acct] = space(a["claude_account_space"])
+    if acct:
         cfg["claude_accounts"] = [acct] + [x for x in cfg.get("claude_accounts", []) if x != acct and "@" in x]
     write(CONFIG, json.dumps(cfg, indent=2, ensure_ascii=False) + "\n")
     ok(f"Saved answers in {tilde(CONFIG)}")
@@ -429,7 +313,7 @@ def is_ours(entry):
 
 
 def install_hooks():
-    step(5, "Claude Code hooks and status line")
+    step(3, "Claude Code hooks and status line")
     try:
         with open(SETTINGS, encoding="utf-8") as fh:
             settings = json.load(fh)
@@ -446,8 +330,11 @@ def install_hooks():
         "Stop": {"hooks": [notify]},
         "Notification": {"hooks": [notify]},
         "PreToolUse": {"matcher": "AskUserQuestion", "hooks": [notify]},
-        "SessionStart": {"matcher": "startup", "hooks": [hook_entry("session_start_hook.py", timeout=10)]},
     }
+    for event in list(hooks):   # clear any earlier Agent Board entries (including ones no longer used)
+        hooks[event] = [e for e in hooks[event] if not is_ours(e)]
+        if not hooks[event]:
+            del hooks[event]
     for event, entry in wanted.items():
         # Replace an earlier Agent Board entry, keep everything else you already had.
         hooks[event] = [e for e in hooks.get(event, []) if not is_ours(e)] + [entry]
@@ -466,7 +353,7 @@ def install_hooks():
 
 
 def build_apps():
-    step(6, "Apps")
+    step(4, "Apps")
     if WINDOWS:
         ok("Windows: notifications use Windows' own notification center, so nothing to build")
         warn("The tray buddy starts in the next step; the Chrome tab finder is the last step")
@@ -525,7 +412,7 @@ def windows_startup():
 
 
 def login_items(apps_built):
-    step(7, "Start at login")
+    step(5, "Start at login")
     if WINDOWS:
         return windows_startup()
     uid = str(os.getuid())
@@ -583,7 +470,7 @@ EXTENSION_STEPS = [
 
 
 def chrome_extension(interactive=True):
-    step(8, "Chrome tab finder (optional, 3 clicks)")
+    step(6, "Chrome tab finder (optional, 3 clicks)")
     say(f"   {D}Lets the board find and switch to your Chrome tabs. It only talks to this computer.{X}")
     if not os.path.exists(CHROME_STATE):
         warn("Google Chrome not found, skipping.")
@@ -605,9 +492,9 @@ def chrome_extension(interactive=True):
     ok("Opened. When it's loaded, the board's Tabs button shows your tabs.")
 
 
-def desktop_connector(cfg, wanted=None, space=None):
+def desktop_connector(cfg, wanted=None):
     """Add the Agent Board connector (local MCP server) to Claude Desktop, so chats can report to the board."""
-    step(9, "Claude Desktop chats (connector)")
+    step(7, "Claude Desktop chats (connector)")
     if not os.path.isdir(DESKTOP_DIR):
         warn("Claude Desktop not found, skipping.")
         return
@@ -616,12 +503,6 @@ def desktop_connector(cfg, wanted=None, space=None):
         wanted = ask("Add the Agent Board connector to Claude Desktop? (y/n)", "y").lower().startswith("y")
     if not wanted:
         return
-    if space not in ("work", "personal"):
-        acct = claude_code_account()
-        default = "w" if (cfg.get("account_spaces") or {}).get(acct, "work") == "work" else "p"
-        space = ask_space("Claude Desktop chats are", cfg.get("desktop_chats_space", "")[:1] or default) or "personal"
-    cfg["desktop_chats_space"] = space
-    write(CONFIG, json.dumps(cfg, indent=2, ensure_ascii=False) + "\n")
     try:
         with open(DESKTOP_CONFIG, encoding="utf-8") as fh:
             dc = json.load(fh)
@@ -635,7 +516,7 @@ def desktop_connector(cfg, wanted=None, space=None):
     py = posix(sys.executable) if WINDOWS else sys.executable
     dc.setdefault("mcpServers", {})["agent-board"] = {"command": py, "args": ["-X", "utf8", posix(CONNECTOR) if WINDOWS else CONNECTOR]}
     write(DESKTOP_CONFIG, json.dumps(dc, indent=2, ensure_ascii=False) + "\n")
-    ok(f"Connector added (chats count as {space})")
+    ok("Connector added")
     say(f"   {D}Restart Claude Desktop to load it. The first time Claude uses it, choose “Always allow”.{X}")
 
 
@@ -717,7 +598,7 @@ def main():
             a = json.load(fh)
         cfg = json.load(open(CONFIG, encoding="utf-8")) if os.path.exists(CONFIG) else {}
         if a.get("desktop_connector", True):
-            desktop_connector(cfg, wanted=True, space=a.get("desktop_chats_space"))
+            desktop_connector(cfg, wanted=True)
     else:
         cfg = json.load(open(CONFIG, encoding="utf-8")) if os.path.exists(CONFIG) else {}
         desktop_connector(cfg, wanted=True if YES else None)

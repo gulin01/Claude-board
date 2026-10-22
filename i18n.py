@@ -22,8 +22,6 @@ STRINGS = {
         "idle_body": "Unused for 24h+ · click to keep or delete",
         "session": "Claude session", "no_folder": "No folder",
         # menu-bar / tray buddy
-        "work_space": "Work space", "personal_space": "Personal space",
-        "switch_to_work": "Switch to Work", "switch_to_personal": "Switch to Personal",
         "needs_you_list": "Needs you", "working_list": "Working",
         "n_done": "{n} done", "n_restart": "{n} to restart", "n_asleep": "{n} asleep",
         "n_need_you": "{n} need you", "n_working": "{n} working", "all_quiet": "all quiet",
@@ -38,8 +36,6 @@ STRINGS = {
         "idle_one": "💤 쉬고 있는 에이전트 1개", "idle_many": "💤 쉬고 있는 에이전트 {n}개",
         "idle_body": "24시간 넘게 사용 안 함 · 눌러서 유지하거나 삭제",
         "session": "Claude 세션", "no_folder": "폴더 없음",
-        "work_space": "업무 공간", "personal_space": "개인 공간",
-        "switch_to_work": "업무로 전환", "switch_to_personal": "개인으로 전환",
         "needs_you_list": "확인 필요", "working_list": "작업 중",
         "n_done": "{n}개 완료", "n_restart": "{n}개 새로 시작 필요", "n_asleep": "{n}개 잠듦",
         "n_need_you": "{n}개 확인 필요", "n_working": "{n}개 작업 중", "all_quiet": "모두 조용해요",
@@ -104,7 +100,7 @@ def permission_message(msg, lang=None):
 def labels(lang=None):
     """Labels for the menu-bar / tray buddy."""
     lang = lang or language()
-    keys = ("work_space", "personal_space", "switch_to_work", "switch_to_personal", "needs_you_list", "working_list",
+    keys = ("needs_you_list", "working_list",
             "n_done", "n_restart", "n_asleep", "n_need_you", "n_working", "all_quiet", "open_board", "quit",
             "not_running", "five_hour", "week")
     return {k: t(k, lang) for k in keys}

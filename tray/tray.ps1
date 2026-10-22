@@ -3,7 +3,7 @@
 #   blue and bobbing  = agents are working
 #   teal, eyes closed = all quiet        grey = the board isn't running
 # Left-click opens the board. Right-click lists agents (click one to open it), shows plan usage,
-# and switches between the Work and Personal spaces. It only talks to the board on this computer.
+# and shows plan usage. It only talks to the board on this computer.
 #
 # Started hidden at sign-in by setup.py:
 #   powershell -NoProfile -STA -WindowStyle Hidden -ExecutionPolicy Bypass -File tray.ps1
@@ -156,21 +156,6 @@ $menu.Add_Opening({
     if ($null -eq $s) {
         [void](Add-Item (L 'not_running' "Agent Board isn't running") $false)
     } else {
-        $personal = ($s.space.space -eq 'personal')
-        [void](Add-Item ($(if ($personal) { L 'personal_space' 'Personal space' } else { L 'work_space' 'Work space' })) $false)
-        $switch = Add-Item ($(if ($personal) { L 'switch_to_work' 'Switch to Work' } else { L 'switch_to_personal' 'Switch to Personal' })) $true
-        $target = if ($personal) { 'work' } else { 'personal' }
-        if ($s.space.auto -eq $target) { $target = 'auto' }   # going back to the time-based space
-        $switch.Tag = $target
-        $switch.Add_Click({
-            param($sender, $e)
-            try {
-                Invoke-RestMethod -Method Post -Uri ($Board + 'api/space') -ContentType 'application/json' `
-                    -Body (@{ space = $sender.Tag } | ConvertTo-Json) -TimeoutSec 3 | Out-Null
-            } catch {}
-            Refresh
-        })
-        [void]$menu.Items.Add('-')
         Add-Agents (L 'needs_you_list' 'Needs you') $s.need
         Add-Agents (L 'working_list' 'Working') $s.work
         $line = @()

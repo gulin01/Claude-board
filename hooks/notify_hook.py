@@ -2,7 +2,6 @@
 """Claude Code hook: macOS notification when an agent finishes or needs you.
 
 Registered for Stop, Notification and PreToolUse(AskUserQuestion) in ~/.claude/settings.json.
-Work projects always notify; personal projects only inside personal_notify_hours (~/.agent-board/config.json).
 Never blocks Claude: every failure exits 0 silently (and is logged).
 """
 import json
@@ -73,7 +72,6 @@ def main():
     cwd = data.get("cwd") or ""
     cfg = common.load_config()
     lang = i18n.language(cfg)
-    category = common.category_for(cwd, cfg)
     project = common.leaf(cwd) or "Claude"
     if common.is_scratch(cwd):
         project = i18n.t("no_folder", lang)
@@ -98,17 +96,17 @@ def main():
         links = extract_links(last_text)
         if links:
             body += f"  ↗ {links[0][:60]}"
-        common.notify(category, head + i18n.t("done", lang), task, body, cfg, url=links[0] if links else link, nid=sid,
+        common.notify(head + i18n.t("done", lang), task, body, cfg, url=links[0] if links else link, nid=sid,
                       board_url=link if links else None)
     elif event == "Notification":
         msg = data.get("message") or "Needs your input"
         if data.get("notification_type") == "idle_prompt" or "waiting for your input" in msg.lower():
             return  # already covered by the Stop notification
-        common.notify(category, head + i18n.t("needs_you", lang), task, i18n.permission_message(msg, lang), cfg,
+        common.notify(head + i18n.t("needs_you", lang), task, i18n.permission_message(msg, lang), cfg,
                       url=link, nid=sid)
     elif event == "PreToolUse" and data.get("tool_name") == "AskUserQuestion":
         qs = (data.get("tool_input") or {}).get("questions") or [{}]
-        common.notify(category, head + i18n.t("question", lang), task,
+        common.notify(head + i18n.t("question", lang), task,
                       first_sentence(qs[0].get("question"), 100) or i18n.t("has_question", lang), cfg, url=link, nid=sid)
 
 
