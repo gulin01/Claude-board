@@ -48,7 +48,7 @@ work through the first unchecked item. Commit after each checked item.
 - [x] Board: all labels translated, Language menu
 - [x] Tray (Windows) + menu-bar buddy (Mac) use labels from the server
 - [x] setup.py asks language first and speaks it; README.ko.md; CLAUDE.md language note
-- [ ] Test both languages, commit, push
+- [x] Test both languages, commit, push
 
 ## Step 4 · Product
 - [ ] One-click setup, settings screen, EN / 한국어 / O'zbek, Mac app
