@@ -364,38 +364,39 @@ body.tv .tv-exit{display:flex}
     <div class="brand"><div class="buddy m-work" style="--c:var(--b3)"><span class="eyes"><i class="eye"></i><i class="eye"></i></span></div><span>Agent Board</span></div>
     <span class="live" id="live" title="Live"></span>
     <div class="space" id="spaceSw" role="tablist" aria-label="Space">
-      <button role="tab" data-space="work"><span class="d"></span>Work</button>
-      <button role="tab" data-space="personal"><span class="d"></span>Personal</button>
+      <button role="tab" data-space="work"><span class="d"></span><span data-t="work">Work</span></button>
+      <button role="tab" data-space="personal"><span class="d"></span><span data-t="personal">Personal</span></button>
     </div>
     <span class="space-note" id="spaceNote"></span>
     <div class="grow"></div>
-    <input class="search" id="q" type="search" placeholder="Find an agent…" aria-label="Find an agent">
+    <input class="search" id="q" type="search" placeholder="Find an agent…" data-tp="search_ph" aria-label="Find an agent">
     <button class="hbtn search-btn" id="searchBtn" aria-label="Search">⌕</button>
-    <button class="hbtn" id="tabsBtn" title="Find your Chrome tabs">◎ Tabs <span class="n" id="tabsN">0</span></button>
-    <button class="hbtn" id="moreBtn" aria-haspopup="true" aria-expanded="false">More ⋯</button>
+    <button class="hbtn" id="tabsBtn" title="Find your Chrome tabs" data-tt="tabs_title">◎ <span data-t="tabs">Tabs</span> <span class="n" id="tabsN">0</span></button>
+    <button class="hbtn" id="moreBtn" aria-haspopup="true" aria-expanded="false"><span data-t="more">More</span> ⋯</button>
   </div>
   <div class="now" id="now"></div>
 </div></header>
 <div class="menu" id="menu" hidden>
-  <button id="mReport"><span class="g">+</span>Report a Chrome agent</button>
-  <button id="mDigest"><span class="g">≡</span>Copy digest</button>
-  <button id="mUsage"><span class="g">◔</span>Usage details</button>
-  <button id="mTv"><span class="g">▣</span>TV mode</button>
-  <button id="mTrash"><span class="g">⌫</span>Trash <span class="mono" id="trashN" style="margin-left:auto">0</span></button>
+  <button id="mReport"><span class="g">+</span><span data-t="m_report">Report a Chrome agent</span></button>
+  <button id="mDigest"><span class="g">≡</span><span data-t="m_digest">Copy digest</span></button>
+  <button id="mUsage"><span class="g">◔</span><span data-t="m_usage">Usage details</span></button>
+  <button id="mTv"><span class="g">▣</span><span data-t="m_tv">TV mode</span></button>
+  <button id="mTrash"><span class="g">⌫</span><span data-t="m_trash">Trash</span> <span class="mono" id="trashN" style="margin-left:auto">0</span></button>
   <hr>
-  <label><span class="g">◷</span>Show<select id="days"><option value="1">24 hours</option><option value="3" selected>3 days</option><option value="7">7 days</option><option value="30">30 days</option></select></label>
-  <label><span class="g">◌</span>Scratch sessions<input type="checkbox" id="scratch" style="margin-left:auto"></label>
+  <label><span class="g">◷</span><span data-t="m_show">Show</span><select id="days"><option value="1" data-t="d1">24 hours</option><option value="3" selected data-t="d3">3 days</option><option value="7" data-t="d7">7 days</option><option value="30" data-t="d30">30 days</option></select></label>
+  <label><span class="g">◌</span><span data-t="m_scratch">Scratch sessions</span><input type="checkbox" id="scratch" style="margin-left:auto"></label>
   <hr>
-  <button id="mSound"><span class="g">♪</span>Sounds<span class="on-off" id="soundState">off</span></button>
-  <button id="mRiver"><span class="g">≋</span>Activity river<span class="on-off" id="riverState">on</span></button>
+  <button id="mSound"><span class="g">♪</span><span data-t="m_sound">Sounds</span><span class="on-off" id="soundState">off</span></button>
+  <button id="mRiver"><span class="g">≋</span><span data-t="m_river">Activity river</span><span class="on-off" id="riverState">on</span></button>
+  <label><span class="g">文</span><span data-t="m_lang">Language</span><select id="langSel" style="margin-left:auto"><option value="auto" data-t="lang_auto">Auto</option><option value="en">English</option><option value="ko">한국어</option></select></label>
 </div>
 
 <div class="wrap"><div class="guard" id="guard" hidden></div></div>
-<main class="wrap" id="rooms"><div class="empty">Loading…</div></main>
+<main class="wrap" id="rooms"><div class="empty" data-t="loading">Loading…</div></main>
 
-<div class="river" id="river"><span class="lbl"><i></i>Live</span><div class="track" id="riverTrack"><span class="river-empty">Activity from your agents will flow here.</span></div></div>
+<div class="river" id="river"><span class="lbl"><i></i><span data-t="live">Live</span></span><div class="track" id="riverTrack"><span class="river-empty" data-t="river_empty">Activity from your agents will flow here.</span></div></div>
 <div class="fx-layer" id="fx"></div>
-<button class="hbtn tv-exit" id="tvExit">✕ Exit TV</button>
+<button class="hbtn tv-exit" id="tvExit" data-t="exit_tv">✕ Exit TV</button>
 <div class="scrim" id="scrim"></div>
 <aside class="sheet" id="sheet" aria-hidden="true">
   <div class="sheet-h"><b id="sheetT"></b><button class="x" id="sheetX" aria-label="Close">✕</button></div>
@@ -404,19 +405,19 @@ body.tv .tv-exit{display:flex}
 
 <dialog id="dlg">
   <form method="dialog" id="rform">
-    <h3>Report a Chrome agent</h3>
-    <p class="note">For agents that don't write Claude Code logs, like Claude in Chrome. Same name = same tile.</p>
-    <label>Agent name<input name="agent" required placeholder="Jira triage"></label>
-    <label>Project<input name="project" placeholder="acme-app"></label>
-    <label>Status<select name="status"><option>working</option><option>done</option><option value="needs_input">needs input</option><option>blocked</option></select></label>
-    <label>What was done<textarea name="message" rows="3" required></textarea></label>
-    <label>Link <span class="note">(optional: the page it's working on)</span><input name="url" type="url" placeholder="https://…"></label>
-    <p style="display:flex;gap:8px;justify-content:flex-end"><button class="mini-btn" value="cancel" formnovalidate>Cancel</button><button class="btn primary" value="ok">Save</button></p>
-    <details><summary class="note">Connect Chrome agents</summary>
-<p class="note">Paste into your Claude in Chrome instructions:</p>
+    <h3 data-t="r_title">Report a Chrome agent</h3>
+    <p class="note" data-t="r_note">For agents that don't write Claude Code logs, like Claude in Chrome. Same name = same tile.</p>
+    <label><span data-t="r_agent">Agent name</span><input name="agent" required placeholder="Jira triage"></label>
+    <label><span data-t="r_project">Project</span><input name="project" placeholder="acme-app"></label>
+    <label><span data-t="r_status">Status</span><select name="status"><option value="working" data-t="st_working">working</option><option value="done" data-t="st_done">done</option><option value="needs_input" data-t="st_needs">needs input</option><option value="blocked" data-t="st_blocked">blocked</option></select></label>
+    <label><span data-t="r_msg">What was done</span><textarea name="message" rows="3" required></textarea></label>
+    <label><span data-t="r_link">Link</span> <span class="note" data-t="r_link_note">(optional: the page it's working on)</span><input name="url" type="url" placeholder="https://…"></label>
+    <p style="display:flex;gap:8px;justify-content:flex-end"><button class="mini-btn" value="cancel" formnovalidate data-t="cancel">Cancel</button><button class="btn primary" value="ok" data-t="save">Save</button></p>
+    <details><summary class="note" data-t="r_connect">Connect Chrome agents</summary>
+<p class="note" data-t="r_paste">Paste into your Claude in Chrome instructions:</p>
 <pre id="chromeInstr">When you start and when you finish a task, open this link in a new tab (URL-encode the values), click Save, then close that tab:
 http://127.0.0.1:4317/report?agent=SHORT_TASK_NAME&amp;project=PROJECT&amp;status=working|done|needs_input&amp;message=ONE_LINE_SUMMARY&amp;url=URL_OF_THE_TAB_YOU_ARE_WORKING_IN</pre>
-<button type="button" class="mini-btn" id="copyInstr">Copy instructions</button></details>
+<button type="button" class="mini-btn" id="copyInstr" data-t="copy_instr">Copy instructions</button></details>
   </form>
 </dialog>
 <div class="toast" id="toast" role="status"></div>
@@ -424,15 +425,120 @@ http://127.0.0.1:4317/report?agent=SHORT_TASK_NAME&amp;project=PROJECT&amp;statu
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+// ---------- Language (English / 한국어). The setting lives on the server so notifications follow it too. ----------
+const I18N = {
+  en: {
+    search_ph:"Find an agent…", tabs:"Tabs", tabs_title:"Find your Chrome tabs", more:"More",
+    work:"Work", personal:"Personal", unsorted:"Unsorted", chrome:"Chrome", sleep_corner:"Sleep corner",
+    m_report:"Report a Chrome agent", m_digest:"Copy digest", m_usage:"Usage details", m_tv:"TV mode", m_trash:"Trash",
+    m_show:"Show", d1:"24 hours", d3:"3 days", d7:"7 days", d30:"30 days", m_scratch:"Scratch sessions",
+    m_sound:"Sounds", m_river:"Activity river", m_lang:"Language", lang_auto:"Auto", on:"on", off:"off",
+    loading:"Loading…", live:"Live", river_empty:"Activity from your agents will flow here.", exit_tv:"✕ Exit TV",
+    r_title:"Report a Chrome agent", r_note:"For agents that don't write Claude Code logs, like Claude in Chrome. Same name = same tile.",
+    r_agent:"Agent name", r_project:"Project", r_status:"Status", r_msg:"What was done", r_link:"Link",
+    r_link_note:"(optional: the page it's working on)", cancel:"Cancel", save:"Save", r_connect:"Connect Chrome agents",
+    r_paste:"Paste into your Claude in Chrome instructions:", copy_instr:"Copy instructions",
+    st_working:"working", st_done:"done", st_needs:"needs input", st_blocked:"blocked",
+    mood_need:"Needs you", mood_work:"Working", mood_done:"Done", mood_sleep:"Asleep", mood_tired:"Tired", mood_stuck:"Stuck", mood_rest:"Resting",
+    c_need:"needs you", c_work:"working", c_done:"done", c_tired:"to restart", c_sleep:"asleep", show_only:"Show only: {x}",
+    tokens_today:"tokens today", five:"5h", week:"week", resets_in:"resets in {t}", resetting:"resetting",
+    u_d:"d", u_h:"h", u_m:"m", now:"now", ago:"{t} ago", context:"context", day:"Day {n}",
+    notifying:"notifying", quiet_until:"quiet until {t}", quiet_title:"Personal notifications only {a}–{b}", n_restart:"{n} to restart",
+    sort_is:"is", chrome_chip:"◎ claude.ai tabs · click to jump", jump_title:"click to jump to this tab",
+    sleep_chip:"unused 24h+ · keep or delete", keep:"Keep", del:"Delete", hide:"Hide", hide_title:"Desktop app session: delete it in the app",
+    empty_match:"No agent matches.", empty_none:"No agents yet. Start Claude Code and they'll appear here.",
+    open_x:"↗ Open {x}", jump:"⇥ Jump to tab", resume:"›_ Resume", resume_copied:"Resume command copied: paste it in a terminal",
+    fresh:"✦ Fresh start", del_btn:"✕ Delete", files:"files", commands:"commands", pages:"pages", helpers:"helpers",
+    tired_msg:"Tired: {why}. Start fresh to save tokens.", ctx_day:"context · day {n}", t_more:"More", task:"Task",
+    latest:"Latest update", links:"Links", files_h:"Files", helpers_h:"Helpers", running:"running", finished:"finished",
+    session:"Session", room:"Room", log:"Log", prompts:"prompts",
+    five_limit:"5-hour limit", week_limit:"Weekly limit", as_of:"as of {t}", full_usage:"Full usage page ↗",
+    plan_later:"Plan limits appear after your next message in Claude Code.",
+    chrome_limits:"Its limits live on claude.ai. This opens them in the right Chrome profile.", open_usage:"Open usage ↗",
+    tokens_proc:"Tokens processed", today:"today", tired_agents:"Tired agents", restart_save:"restart to save tokens",
+    all_fresh:"all fresh", none_tired:"No agent is too old or too big.",
+    reading_tabs:"Reading Chrome tabs…", active:"Active", claude:"Claude", all:"All", all_accounts:"All accounts",
+    find_tab:"Find a tab…", no_live:"No Claude agent is using a Chrome tab right now.", no_tabs:"No tabs match.",
+    needs_ext:"Load the Agent Board Chrome extension to find your tabs (see README → Chrome tab finder).",
+    deleted_ago:"deleted {t} ago", restore:"Restore", empty_trash:"Empty trash for good", trash_empty:"Trash is empty.",
+    confirm_empty:"Permanently delete {n} agent(s)? This can't be undone.", deleted_n:"Permanently deleted {n}",
+    sh_agent:"Agent", sh_usage:"Usage", sh_tabs:"Chrome tabs", sh_trash:"Trash",
+    gone:"That agent is no longer on the board", live_upd:"Live · updated {t}", unreachable:"Board server not reachable",
+    undo:"Undo", wrong:"Something went wrong", moved_trash:"Moved to trash", kept:"Kept. It won't be flagged again until it's idle again.",
+    hidden:"Hidden", restored:"Restored", moved_to:"Moved to {x}", clip_fail:"Couldn't access the clipboard", back_work:"Back to Work",
+    switched_open:"Switched to the open tab", opened_chrome:"Opened in Chrome", switched_tab:"Switched to the tab",
+    handoff_copied:"Handoff copied: paste it into a new Claude session", copied:"Copied", digest_copied:"Digest copied as Markdown",
+    instr_copied:"Instructions copied", saved:"Saved",
+    guard:"<b>Personal</b> during work hours. It switches back to Work after 10 minutes without activity.",
+    until:"until {t}", auto_sw:"auto · switches {t}", lang_set:"Language: {x}",
+  },
+  ko: {
+    search_ph:"에이전트 찾기…", tabs:"탭", tabs_title:"Chrome 탭 찾기", more:"더보기",
+    work:"업무", personal:"개인", unsorted:"미분류", chrome:"Chrome", sleep_corner:"쉬는 에이전트",
+    m_report:"Chrome 에이전트 보고", m_digest:"요약 복사", m_usage:"사용량 자세히", m_tv:"TV 모드", m_trash:"휴지통",
+    m_show:"기간", d1:"24시간", d3:"3일", d7:"7일", d30:"30일", m_scratch:"임시 세션",
+    m_sound:"소리", m_river:"활동 흐름", m_lang:"언어", lang_auto:"자동", on:"켜짐", off:"꺼짐",
+    loading:"불러오는 중…", live:"실시간", river_empty:"에이전트의 활동이 여기에 흘러가요.", exit_tv:"✕ TV 끄기",
+    r_title:"Chrome 에이전트 보고", r_note:"Claude in Chrome처럼 Claude Code 기록이 없는 에이전트용이에요. 이름이 같으면 같은 타일이에요.",
+    r_agent:"에이전트 이름", r_project:"프로젝트", r_status:"상태", r_msg:"한 일", r_link:"링크",
+    r_link_note:"(선택: 작업 중인 페이지)", cancel:"취소", save:"저장", r_connect:"Chrome 에이전트 연결",
+    r_paste:"Claude in Chrome 지침에 붙여 넣으세요:", copy_instr:"지침 복사",
+    st_working:"작업 중", st_done:"완료", st_needs:"확인 필요", st_blocked:"막힘",
+    mood_need:"확인 필요", mood_work:"작업 중", mood_done:"완료", mood_sleep:"잠듦", mood_tired:"지침", mood_stuck:"멈춤", mood_rest:"쉬는 중",
+    c_need:"확인 필요", c_work:"작업 중", c_done:"완료", c_tired:"새로 시작", c_sleep:"잠듦", show_only:"{x}만 보기",
+    tokens_today:"오늘 토큰", five:"5시간", week:"주간", resets_in:"{t} 후 초기화", resetting:"초기화 중",
+    u_d:"일", u_h:"시간", u_m:"분", now:"방금", ago:"{t} 전", context:"컨텍스트", day:"{n}일째",
+    notifying:"알림 켜짐", quiet_until:"{t}까지 조용", quiet_title:"개인 알림은 {a}–{b}에만 와요", n_restart:"{n}개 새로 시작 필요",
+    sort_is:"프로젝트는", chrome_chip:"◎ claude.ai 탭 · 눌러서 이동", jump_title:"눌러서 이 탭으로 이동",
+    sleep_chip:"24시간+ 미사용 · 유지 또는 삭제", keep:"유지", del:"삭제", hide:"숨기기", hide_title:"데스크톱 앱 세션이에요. 앱에서 삭제하세요",
+    empty_match:"맞는 에이전트가 없어요.", empty_none:"아직 에이전트가 없어요. Claude Code를 시작하면 여기에 나타나요.",
+    open_x:"↗ {x} 열기", jump:"⇥ 탭으로 이동", resume:"›_ 이어서 하기", resume_copied:"이어서 하기 명령을 복사했어요. 터미널에 붙여 넣으세요",
+    fresh:"✦ 새로 시작", del_btn:"✕ 삭제", files:"파일", commands:"명령", pages:"페이지", helpers:"도우미",
+    tired_msg:"지침: {why}. 새로 시작하면 토큰을 아낄 수 있어요.", ctx_day:"컨텍스트 · {n}일째", t_more:"더보기", task:"작업",
+    latest:"최근 소식", links:"링크", files_h:"파일", helpers_h:"도우미", running:"실행 중", finished:"완료",
+    session:"세션", room:"방", log:"기록", prompts:"요청",
+    five_limit:"5시간 한도", week_limit:"주간 한도", as_of:"{t} 기준", full_usage:"전체 사용량 페이지 ↗",
+    plan_later:"Claude Code에서 메시지를 한 번 보내면 요금제 한도가 나타나요.",
+    chrome_limits:"한도는 claude.ai에 있어요. 맞는 Chrome 프로필에서 열어 드려요.", open_usage:"사용량 열기 ↗",
+    tokens_proc:"처리한 토큰", today:"오늘", tired_agents:"지친 에이전트", restart_save:"새로 시작하면 토큰 절약",
+    all_fresh:"모두 쌩쌩해요", none_tired:"너무 오래되거나 큰 에이전트가 없어요.",
+    reading_tabs:"Chrome 탭 읽는 중…", active:"활성", claude:"Claude", all:"전체", all_accounts:"모든 계정",
+    find_tab:"탭 찾기…", no_live:"지금 Chrome 탭을 쓰는 Claude 에이전트가 없어요.", no_tabs:"맞는 탭이 없어요.",
+    needs_ext:"탭을 찾으려면 Agent Board Chrome 확장 프로그램을 추가하세요 (README → Chrome 탭 찾기 참고).",
+    deleted_ago:"{t} 전 삭제", restore:"복원", empty_trash:"휴지통 완전히 비우기", trash_empty:"휴지통이 비어 있어요.",
+    confirm_empty:"에이전트 {n}개를 완전히 삭제할까요? 되돌릴 수 없어요.", deleted_n:"{n}개를 완전히 삭제했어요",
+    sh_agent:"에이전트", sh_usage:"사용량", sh_tabs:"Chrome 탭", sh_trash:"휴지통",
+    gone:"이 에이전트는 더 이상 보드에 없어요", live_upd:"실시간 · {t} 업데이트", unreachable:"보드 서버에 연결할 수 없어요",
+    undo:"되돌리기", wrong:"문제가 생겼어요", moved_trash:"휴지통으로 옮겼어요", kept:"유지했어요. 다시 쉬기 전까지는 알리지 않아요.",
+    hidden:"숨겼어요", restored:"복원했어요", moved_to:"{x}(으)로 옮겼어요", clip_fail:"클립보드에 접근할 수 없어요", back_work:"업무로 돌아왔어요",
+    switched_open:"열린 탭으로 이동했어요", opened_chrome:"Chrome에서 열었어요", switched_tab:"탭으로 이동했어요",
+    handoff_copied:"인계 내용을 복사했어요. 새 Claude 세션에 붙여 넣으세요", copied:"복사했어요", digest_copied:"요약을 마크다운으로 복사했어요",
+    instr_copied:"지침을 복사했어요", saved:"저장했어요",
+    guard:"업무 시간에 <b>개인</b> 공간을 보고 있어요. 10분 동안 활동이 없으면 업무로 돌아가요.",
+    until:"{t}까지", auto_sw:"자동 · {t}에 전환", lang_set:"언어: {x}",
+  },
+};
+let LANG = "en", LANG_SETTING = "auto";
+function t(k, vars){ let s = (I18N[LANG] || I18N.en)[k] ?? I18N.en[k] ?? k;
+  if (vars) for (const [a, b] of Object.entries(vars)) s = s.split("{" + a + "}").join(b); return s; }
+function tr(k, vars){ return t(k, vars); }   // for places where "t" is a local name (a tab, a trash item)
+const LOCALE = () => LANG === "ko" ? "ko-KR" : undefined;
+function applyStatic(){
+  document.documentElement.lang = LANG;
+  document.querySelectorAll("[data-t]").forEach(el => { el.textContent = t(el.dataset.t); });
+  document.querySelectorAll("[data-tp]").forEach(el => { el.placeholder = t(el.dataset.tp); });
+  document.querySelectorAll("[data-tt]").forEach(el => { el.title = t(el.dataset.tt); });
+  if ($("#langSel")) $("#langSel").value = LANG_SETTING;
+}
 const COLORS = ["--b1","--b2","--b3","--b4","--b5","--b6"];
 const MOOD = {
-  need:  {label:"Needs you", color:"var(--need)"},
-  work:  {label:"Working",   color:"var(--work)"},
-  done:  {label:"Done",      color:"var(--done)"},
-  sleep: {label:"Asleep",    color:"var(--sleep)"},
-  tired: {label:"Tired",     color:"var(--tired)"},
-  stuck: {label:"Stuck",     color:"var(--stuck)"},
-  rest:  {label:"Resting",   color:"var(--sleep)"},
+  need:  {get label(){ return t("mood_need"); }, color:"var(--need)"},
+  work:  {get label(){ return t("mood_work"); },   color:"var(--work)"},
+  done:  {get label(){ return t("mood_done"); },      color:"var(--done)"},
+  sleep: {get label(){ return t("mood_sleep"); },    color:"var(--sleep)"},
+  tired: {get label(){ return t("mood_tired"); },     color:"var(--tired)"},
+  stuck: {get label(){ return t("mood_stuck"); },     color:"var(--stuck)"},
+  rest:  {get label(){ return t("mood_rest"); },   color:"var(--sleep)"},
 };
 const ICON = {prompt:"›", edit:"✎", run:"$", agent:"⑂", skill:"✦", web:"↗", publish:"⇪", ask:"?", tool:"·", report:"•"};
 
@@ -443,7 +549,7 @@ try { $("#scratch").checked = localStorage.getItem("ab-scratch") === "1"; } catc
 
 // ---------- helpers ----------
 function ago(ts){ if (!ts) return ""; const d = Math.max(0, now - ts);
-  return d < 60 ? "now" : d < 3600 ? Math.floor(d/60)+"m" : d < 86400 ? Math.floor(d/3600)+"h" : Math.floor(d/86400)+"d"; }
+  return d < 60 ? t("now") : d < 3600 ? Math.floor(d/60)+t("u_m") : d < 86400 ? Math.floor(d/3600)+t("u_h") : Math.floor(d/86400)+t("u_d"); }
 function hash(s){ let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) | 0; return Math.abs(h); }
 const colorOf = key => `var(${COLORS[hash(key) % COLORS.length]})`;
 const kTok = t => t == null ? "" : t >= 1e6 ? (t/1e6).toFixed(1)+"M" : Math.round(t/1000)+"k";
@@ -500,22 +606,22 @@ function buddy(m, color, opts = {}){
   const where = opts.where ? `<span class="where">${esc(opts.where)}</span>` : "";
   return `<div class="buddy m-${m}" style="${s}--c:${color}"><span class="eyes"><i class="eye"></i><i class="eye"></i></span>${arm}${fx}${badge}${where}</div>`;
 }
-function battery(f){ return f ? `<span class="batt" style="--v:${f.v.toFixed(2)};--bc:${f.color}" title="${f.text} context"><i></i></span>` : `<span></span>`; }
-function dayDots(s){ return `<span class="days" title="Day ${s.life ? s.life.age_days : 1}">${lifeDays(s, 5).map(c => `<i class="${c.used ? "" : "off"} ${c.old ? "old" : ""}"></i>`).join("")}</span>`; }
+function battery(f){ return f ? `<span class="batt" style="--v:${f.v.toFixed(2)};--bc:${f.color}" title="${f.text} ${t("context")}"><i></i></span>` : `<span></span>`; }
+function dayDots(s){ return `<span class="days" title="${t("day", {n: s.life ? s.life.age_days : 1})}">${lifeDays(s, 5).map(c => `<i class="${c.used ? "" : "off"} ${c.old ? "old" : ""}"></i>`).join("")}</span>`; }
 
 // ---------- Now bar ----------
 function planWindows(acct){
   const rl = acct && acct.rate_limits; if (!rl) return [];
   const w = (k, label) => { const x = rl[k]; if (!x) return null; const p = x.used_percentage ?? x.utilization;
     return p == null ? null : {label, p: Math.round(p), reset: resetIn(x.resets_at)}; };
-  return [w("five_hour", "5h"), w("seven_day", "week")].filter(Boolean);
+  return [w("five_hour", t("five")), w("seven_day", t("week"))].filter(Boolean);
 }
 function resetIn(r){
   if (r == null) return "";
-  const t = typeof r === "number" ? (r > 1e12 ? r/1000 : r) : Date.parse(r)/1000;
-  const d = t - Date.now()/1000; if (!(d > 0)) return "resetting";
+  const tt = typeof r === "number" ? (r > 1e12 ? r/1000 : r) : Date.parse(r)/1000;
+  const d = tt - Date.now()/1000; if (!(d > 0)) return t("resetting");
   const h = Math.floor(d/3600), m = Math.round((d%3600)/60);
-  return "resets in " + (h >= 24 ? Math.floor(h/24)+"d " + (h%24)+"h" : h ? h+"h "+m+"m" : m+"m");
+  return t("resets_in", {t: h >= 24 ? Math.floor(h/24)+t("u_d")+" " + (h%24)+t("u_h") : h ? h+t("u_h")+" "+m+t("u_m") : m+t("u_m")});
 }
 const level = p => p >= 90 ? "var(--tired)" : p >= 70 ? "var(--need)" : "var(--done)";
 function ring(w){
@@ -525,15 +631,15 @@ function ring(w){
 function renderNow(){
   const list = shown();
   const n = m => list.filter(s => mood(s) === m).length;
-  const counters = [["need","needs you"],["work","working"],["done","done"],["tired","to restart"],["sleep","asleep"]];
+  const counters = [["need",t("c_need")],["work",t("c_work")],["done",t("c_done")],["tired",t("c_tired")],["sleep",t("c_sleep")]];
   const accts = (usage && usage.plan || []).map(a => ({...a, w: planWindows(a)})).filter(a => a.w.length);
   const chromeOnly = usage && usage.other_accounts || [];
   $("#now").innerHTML = counters.map(([m, l]) => { const v = n(m);
-      return `<button class="cnt ${moodFilter === m ? "on" : ""} ${v ? "" : "zero"}" data-mood="${m}" title="Show only: ${MOOD[m].label}">${buddy(v ? m : "rest", colorOf(m + "x"), {size: 30})}<b>${v}</b><span>${l}</span></button>`; }).join("")
-    + (usage ? `<button class="usage" id="usageBtn" title="Usage details">
+      return `<button class="cnt ${moodFilter === m ? "on" : ""} ${v ? "" : "zero"}" data-mood="${m}" title="${t("show_only", {x: MOOD[m].label})}">${buddy(v ? m : "rest", colorOf(m + "x"), {size: 30})}<b>${v}</b><span>${l}</span></button>`; }).join("")
+    + (usage ? `<button class="usage" id="usageBtn" title="${t("m_usage")}">
         ${accts.map(a => `<span class="acc"><span class="av" style="background:${colorOf(a.account)}" title="${esc(a.account)}">${esc(a.account[0])}</span>${a.w.map(ring).join("")}</span>`).join("")}
         ${chromeOnly.map(e => `<span class="acc chrome" title="${esc(e.label)} · ${esc(e.sub)}"><span class="av" style="background:${colorOf(e.profile || e.label)}">◎</span></span>`).join("")}
-        <span class="tok"><b>${mTok(usage.tokens.today)}</b><small>tokens today</small></span>
+        <span class="tok"><b>${mTok(usage.tokens.today)}</b><small>${t("tokens_today")}</small></span>
       </button>` : "");
 }
 
@@ -546,7 +652,7 @@ function tile(s){
   const m = mood(s), f = fuel(s), kinds = s.timeline.filter(t => t.kind !== "prompt").map(t => t.kind);
   const dim = moodFilter && moodFilter !== m ? "dim" : "";
   return `<div class="tile m-${m}-t ${dim} ${sheet.kind === "agent" && sheet.id === s.id ? "sel" : ""}" role="button" tabindex="0" data-open="${esc(s.id)}"
-      title="${esc(s.title)} · ${MOOD[m].label} · ${ago(s.last_activity)}">
+      title="${esc(s.title)} · ${MOOD[m].label} · ${t("ago", {t: ago(s.last_activity)})}">
     <span class="ago">${ago(s.last_activity)}</span>
     <div class="stage">${buddy(m, colorOf(s.project), {kinds, where: whereOf(s)})}</div>
     <div class="tname">${esc(s.title)}</div>
@@ -558,7 +664,7 @@ function chromeTile(t){
   const name = (t.title || "").replace(/^[✓✔]\s*/, "");
   const m = /^[✓✔]/.test(t.title || "") ? "done" : "rest";
   const who = (t.profile_email || "").split("@")[0];
-  return `<div class="tile m-${m}-t ${moodFilter && moodFilter !== m ? "dim" : ""}" role="button" tabindex="0" data-w="${t.window}" data-t="${t.tab}" title="${esc(t.title)} · click to jump to this tab">
+  return `<div class="tile m-${m}-t ${moodFilter && moodFilter !== m ? "dim" : ""}" role="button" tabindex="0" data-w="${t.window}" data-t="${t.tab}" title="${esc(t.title)} · ${tr("jump_title")}">
     <div class="stage">${buddy(m, colorOf(t.profile_email || "chrome"), {where: "◎"})}</div>
     <div class="tname">${esc(name || t.url)}</div>
     <div class="tproj"><span class="dot" style="--c:${colorOf(t.profile_email || "chrome")}"></span>${esc(t.claude)}${who ? " · " + esc(who) : ""}</div>
@@ -569,10 +675,10 @@ function room(key, title, list, extra = ""){
   if (!list.length && !extra) return "";
   const order = {need:0, work:1, stuck:2, done:3, tired:4, rest:5, sleep:6};
   list.sort((a, b) => order[mood(a)] - order[mood(b)] || b.last_activity - a.last_activity);
-  const quiet = key === "personal" && personalHours ? `<span class="chip" title="Personal notifications only ${personalHours.from}–${personalHours.to}">♪ ${windowOpen ? "notifying" : "quiet until " + personalHours.from}</span>` : "";
+  const quiet = key === "personal" && personalHours ? `<span class="chip" title="${t("quiet_title", {a: personalHours.from, b: personalHours.to})}">♪ ${windowOpen ? t("notifying") : t("quiet_until", {t: personalHours.from})}</span>` : "";
   const heavy = list.filter(s => mood(s) === "tired").length;
   return `<section class="room" data-room="${key}">
-    <div class="room-h"><h2>${title}</h2><span class="cnum">${list.length}</span>${quiet}${heavy ? `<span class="chip warn">${heavy} to restart</span>` : ""}</div>
+    <div class="room-h"><h2>${title}</h2><span class="cnum">${list.length}</span>${quiet}${heavy ? `<span class="chip warn">${t("n_restart", {n: heavy})}</span>` : ""}</div>
     ${extra}
     <div class="grid">${list.map(tile).join("")}</div>
   </section>`;
@@ -584,18 +690,18 @@ function renderRooms(){
   const by = c => awake.filter(s => s.category === c);
   // Unsorted: one "Work / Personal?" question per project folder.
   const uns = by("unsorted"), keys = [...new Map(uns.filter(s => !s.is_scratch && s.classify_key).map(s => [s.classify_key, s])).values()];
-  const ask = keys.map(s => `<div class="sortbar"><b>${esc(s.project)}</b> is<button class="pill-btn" data-key="${esc(s.classify_key)}" data-cat="work">Work</button><button class="pill-btn" data-key="${esc(s.classify_key)}" data-cat="personal">Personal</button></div>`).join("");
+  const ask = keys.map(s => `<div class="sortbar"><b>${esc(s.project)}</b> ${t("sort_is")}<button class="pill-btn" data-key="${esc(s.classify_key)}" data-cat="work">${t("work")}</button><button class="pill-btn" data-key="${esc(s.classify_key)}" data-cat="personal">${t("personal")}</button></div>`).join("");
   const claudeTabs = (tabsData || []).filter(t => t.claude);
-  let html = room("work", "Work", by("work")) + room("personal", "Personal", by("personal")) + room("unsorted", "Unsorted", uns, ask);
-  if (claudeTabs.length) html += `<section class="room" data-room="chrome"><div class="room-h"><h2>Chrome</h2><span class="cnum">${claudeTabs.length}</span><span class="chip">◎ claude.ai tabs · click to jump</span></div>
+  let html = room("work", t("work"), by("work")) + room("personal", t("personal"), by("personal")) + room("unsorted", t("unsorted"), uns, ask);
+  if (claudeTabs.length) html += `<section class="room" data-room="chrome"><div class="room-h"><h2>Chrome</h2><span class="cnum">${claudeTabs.length}</span><span class="chip">${t("chrome_chip")}</span></div>
     <div class="grid">${claudeTabs.map(chromeTile).join("")}</div></section>`;
-  if (asleep.length) html += `<section class="room" id="sleep"><div class="room-h"><h2>Sleep corner</h2><span class="cnum">${asleep.length}</span><span class="chip">unused 24h+ · keep or delete</span></div>
+  if (asleep.length) html += `<section class="room" id="sleep"><div class="room-h"><h2>${t("sleep_corner")}</h2><span class="cnum">${asleep.length}</span><span class="chip">${t("sleep_chip")}</span></div>
     <div class="sleep-room"><div class="sleep-row">${asleep.map(s => `<div class="nap">${buddy("sleep", colorOf(s.project), {size: 32})}
       <span class="t" data-open="${esc(s.id)}"><b>${esc(s.title)}</b><small>${esc(s.project)} · ${ago(s.last_activity)}</small></span>
-      <button class="mini-btn" data-act="keep" data-id="${esc(s.id)}">Keep</button>
-      ${s.deletable ? `<button class="mini-btn del" data-act="delete" data-id="${esc(s.id)}">Delete</button>` : `<button class="mini-btn" data-act="hide" data-id="${esc(s.id)}" title="Desktop app session: delete it in the app">Hide</button>`}
+      <button class="mini-btn" data-act="keep" data-id="${esc(s.id)}">${t("keep")}</button>
+      ${s.deletable ? `<button class="mini-btn del" data-act="delete" data-id="${esc(s.id)}">${t("del")}</button>` : `<button class="mini-btn" data-act="hide" data-id="${esc(s.id)}" title="${t("hide_title")}">${t("hide")}</button>`}
     </div>`).join("")}</div></div></section>`;
-  if (!html) html = `<div class="empty">${buddy("rest", "var(--b3)", {size: 70})}${$("#q").value ? "No agent matches." : "No agents yet. Start Claude Code and they'll appear here."}</div>`;
+  if (!html) html = `<div class="empty">${buddy("rest", "var(--b3)", {size: 70})}${$("#q").value ? t("empty_match") : t("empty_none")}</div>`;
   // Reuse unchanged tiles so their animations don't restart on every refresh.
   const y = scrollY, prev = new Map([...document.querySelectorAll(".tile[data-open]")].map(el => [el.dataset.open, el]));
   $("#rooms").innerHTML = html;
@@ -613,69 +719,69 @@ function agentSheet(s){
   const openTab = (tabsData || []).find(t => (t.agents || []).some(a => a.id === s.id));
   const retire = s.life && s.life.retire.length;
   const btns = [];
-  if (s.links && s.links[0]) btns.push(`<a class="btn primary open-link" href="${esc(s.links[0])}"><span>↗ Open ${esc(linkLabel(s.links[0]))}</span></a>`);
-  if (openTab) btns.push(`<button class="btn ${btns.length ? "" : "primary"}" data-w="${openTab.window}" data-t="${openTab.tab}"><span>⇥ Jump to tab</span></button>`);
-  if (s.kind === "claude-code") btns.push(`<button class="btn ${btns.length ? "" : "primary"}" data-copy="claude --resume ${esc(s.id)}" data-msg="Resume command copied: paste it in a terminal"><span>›_ Resume</span></button>`);
-  btns.push(`<button class="btn ${retire ? "hot" : ""}" data-handoff="${esc(s.id)}"><span>✦ Fresh start</span></button>`);
-  btns.push(s.deletable ? `<button class="btn warn" data-act="delete" data-id="${esc(s.id)}"><span>✕ Delete</span></button>` : `<button class="btn" data-act="hide" data-id="${esc(s.id)}"><span>Hide</span></button>`);
+  if (s.links && s.links[0]) btns.push(`<a class="btn primary open-link" href="${esc(s.links[0])}"><span>${t("open_x", {x: esc(linkLabel(s.links[0]))})}</span></a>`);
+  if (openTab) btns.push(`<button class="btn ${btns.length ? "" : "primary"}" data-w="${openTab.window}" data-t="${openTab.tab}"><span>${t("jump")}</span></button>`);
+  if (s.kind === "claude-code") btns.push(`<button class="btn ${btns.length ? "" : "primary"}" data-copy="claude --resume ${esc(s.id)}" data-msg="${t("resume_copied")}"><span>${t("resume")}</span></button>`);
+  btns.push(`<button class="btn ${retire ? "hot" : ""}" data-handoff="${esc(s.id)}"><span>${t("fresh")}</span></button>`);
+  btns.push(s.deletable ? `<button class="btn warn" data-act="delete" data-id="${esc(s.id)}"><span>${t("del_btn")}</span></button>` : `<button class="btn" data-act="hide" data-id="${esc(s.id)}"><span>${t("hide")}</span></button>`);
   if (btns.length % 2) btns[btns.length - 1] = btns[btns.length - 1].replace('class="btn', 'class="btn wide');
   const cal = lifeDays(s, 14);
   const why = [];
-  if (s.life && s.life.retire.includes("age")) why.push(`day ${s.life.age_days}`);
-  if (s.life && s.life.retire.includes("context")) why.push(`${kTok(s.context_tokens)} context`);
+  if (s.life && s.life.retire.includes("age")) why.push(t("day", {n: s.life.age_days}));
+  if (s.life && s.life.retire.includes("context")) why.push(`${kTok(s.context_tokens)} ${t("context")}`);
   const tl = s.timeline.slice().reverse();
   return `
     <div class="dtop">${buddy(m, colorOf(s.project), {size: 64, where: whereOf(s), kinds: s.timeline.map(t => t.kind)})}
       <div style="min-width:0"><h3>${esc(s.title)}</h3><div class="tproj"><span class="dot" style="--c:${colorOf(s.project)}"></span>${esc(s.project)}${s.branch ? ` · ${esc(s.branch)}` : ""}</div></div></div>
-    <div class="state-line"><span class="sw" style="background:${MOOD[m].color}"></span>${MOOD[m].label}<small>· ${ago(s.last_activity)} ago</small></div>
+    <div class="state-line"><span class="sw" style="background:${MOOD[m].color}"></span>${MOOD[m].label}<small>· ${t("ago", {t: ago(s.last_activity)})}</small></div>
     <div class="icons">
-      <div class="ic"><span class="g">✎</span><b>${projFiles.length}</b><small>files</small></div>
-      <div class="ic"><span class="g">$</span><b>${c.run}</b><small>commands</small></div>
-      <div class="ic"><span class="g">↗</span><b>${c.page}</b><small>pages</small></div>
-      <div class="ic"><span class="g">⑂</span><b>${s.subagents.length}</b><small>helpers</small></div>
+      <div class="ic"><span class="g">✎</span><b>${projFiles.length}</b><small>${t("files")}</small></div>
+      <div class="ic"><span class="g">$</span><b>${c.run}</b><small>${t("commands")}</small></div>
+      <div class="ic"><span class="g">↗</span><b>${c.page}</b><small>${t("pages")}</small></div>
+      <div class="ic"><span class="g">⑂</span><b>${s.subagents.length}</b><small>${t("helpers")}</small></div>
     </div>
     ${s.latest ? `<div class="said"><span class="q2">“</span><span>${esc(firstSentence(s.latest))}</span></div>` : ""}
     <div class="btns">${btns.join("")}</div>
-    ${f || cal.length ? `<div class="energy">${battery(f)}<div style="flex:1"><b>${f ? f.text : "—"}</b><small>${retire ? "Tired: " + why.join(" · ") + ". Start fresh to save tokens." : "context · day " + (s.life ? s.life.age_days : 1)}</small></div></div>
-      <div class="cal">${cal.map(c => `<span class="d ${c.used ? "" : "off"} ${c.old ? "old" : ""} ${c.today ? "today" : ""}" title="${c.key}${c.used ? ` · ${c.prompts} prompts` : ""}"><i></i>${c.d.toLocaleDateString([], {weekday: "narrow"})}</span>`).join("")}</div>` : ""}
-    <details class="more" id="moreD" ${sheet.more ? "open" : ""}><summary>More</summary>
-      ${s.task ? `<h4>Task</h4><div class="pre">${esc(s.task)}</div>` : ""}
-      ${s.latest ? `<h4>Latest update</h4><div class="pre">${esc(s.latest)}</div>` : ""}
-      ${(s.links || []).length > 1 ? `<h4>Links</h4><div class="row2">${s.links.map(u => `<a class="mini-btn open-link" href="${esc(u)}">${esc(linkLabel(u))} ↗</a>`).join("")}</div>` : ""}
-      ${projFiles.length ? `<h4>Files</h4><ul class="files">${projFiles.map(x => `<li title="${esc(x.path)}">${esc(x.path)} <em>×${x.edits}</em></li>`).join("")}</ul>` : ""}
-      ${s.subagents.length ? `<h4>Helpers</h4><div class="subs">${s.subagents.map(a => `<div class="sub"><b>${esc(a.description)}</b> · ${a.running ? "running" : "finished"}${a.summary ? `<small>${esc(firstSentence(a.summary, 160))}</small>` : ""}</div>`).join("")}</div>` : ""}
-      <h4>Session</h4><div class="kv"><code>${esc(s.cwd || s.project)}</code><span>${esc(s.source)}${s.model ? " · " + esc(s.model) : ""}${s.cost != null ? ` · $${s.cost.toFixed(2)}` : ""}</span>
-        ${s.classify_key && !s.is_scratch ? `<span class="row2">Room: <select id="moveSel" data-key="${esc(s.classify_key)}">${["work","personal","unsorted"].map(k => `<option value="${k}" ${s.category === k ? "selected" : ""}>${k[0].toUpperCase() + k.slice(1)}</option>`).join("")}</select></span>` : ""}</div>
-      <h4>Log (${s.timeline.length})</h4><ul class="tl">${tl.map(e => `<li class="${e.kind}"><span class="k">${ICON[e.kind] || "·"}</span><span>${esc(e.text)}</span><span class="w">${ago(e.ts)}</span></li>`).join("")}</ul>
+    ${f || cal.length ? `<div class="energy">${battery(f)}<div style="flex:1"><b>${f ? f.text : "—"}</b><small>${retire ? t("tired_msg", {why: why.join(" · ")}) : t("ctx_day", {n: s.life ? s.life.age_days : 1})}</small></div></div>
+      <div class="cal">${cal.map(c => `<span class="d ${c.used ? "" : "off"} ${c.old ? "old" : ""} ${c.today ? "today" : ""}" title="${c.key}${c.used ? ` · ${c.prompts} ${t("prompts")}` : ""}"><i></i>${c.d.toLocaleDateString(LOCALE(), {weekday: "narrow"})}</span>`).join("")}</div>` : ""}
+    <details class="more" id="moreD" ${sheet.more ? "open" : ""}><summary>${t("t_more")}</summary>
+      ${s.task ? `<h4>${t("task")}</h4><div class="pre">${esc(s.task)}</div>` : ""}
+      ${s.latest ? `<h4>${t("latest")}</h4><div class="pre">${esc(s.latest)}</div>` : ""}
+      ${(s.links || []).length > 1 ? `<h4>${t("links")}</h4><div class="row2">${s.links.map(u => `<a class="mini-btn open-link" href="${esc(u)}">${esc(linkLabel(u))} ↗</a>`).join("")}</div>` : ""}
+      ${projFiles.length ? `<h4>${t("files_h")}</h4><ul class="files">${projFiles.map(x => `<li title="${esc(x.path)}">${esc(x.path)} <em>×${x.edits}</em></li>`).join("")}</ul>` : ""}
+      ${s.subagents.length ? `<h4>${t("helpers_h")}</h4><div class="subs">${s.subagents.map(a => `<div class="sub"><b>${esc(a.description)}</b> · ${a.running ? t("running") : t("finished")}${a.summary ? `<small>${esc(firstSentence(a.summary, 160))}</small>` : ""}</div>`).join("")}</div>` : ""}
+      <h4>${t("session")}</h4><div class="kv"><code>${esc(s.cwd || s.project)}</code><span>${esc(s.source)}${s.model ? " · " + esc(s.model) : ""}${s.cost != null ? ` · $${s.cost.toFixed(2)}` : ""}</span>
+        ${s.classify_key && !s.is_scratch ? `<span class="row2">${t("room")}: <select id="moveSel" data-key="${esc(s.classify_key)}">${["work","personal","unsorted"].map(k => `<option value="${k}" ${s.category === k ? "selected" : ""}>${t(k)}</option>`).join("")}</select></span>` : ""}</div>
+      <h4>${t("log")} (${s.timeline.length})</h4><ul class="tl">${tl.map(e => `<li class="${e.kind}"><span class="k">${ICON[e.kind] || "·"}</span><span>${esc(e.text)}</span><span class="w">${ago(e.ts)}</span></li>`).join("")}</ul>
     </details>`;
 }
 
 // ---------- Sheet: usage ----------
 function usageSheet(){
-  if (!usage) return `<p class="note">Loading…</p>`;
+  if (!usage) return `<p class="note">${t("loading")}</p>`;
   const accts = (usage.plan || []).map(a => ({...a, w: planWindows(a)})).filter(a => a.w.length);
-  const hm = ts => new Date(ts*1000).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
+  const hm = ts => new Date(ts*1000).toLocaleTimeString(LOCALE(), {hour: "2-digit", minute: "2-digit"});
   const max = Math.max(1, ...usage.days.map(d => d.tokens)), todayKey = usage.days[usage.days.length - 1].date;
   const tired = shown().filter(s => mood(s) === "tired").sort((a, b) => (b.context_tokens || 0) - (a.context_tokens || 0));
   const row = (s, right, m) => `<div class="lrow" data-open="${esc(s.id)}">${buddy(m || mood(s), colorOf(s.project), {size: 24})}<span class="t">${esc(s.title)}</span><span class="n">${right}</span></div>`;
   return `
-    ${accts.map(a => `<div class="card2"><h4><span>${esc(a.account)}</span><small>as of ${hm(a.updated)}</small></h4>
-      ${a.w.map(w => `<div class="meter"><div class="r"><span>${w.label === "5h" ? "5-hour limit" : "Weekly limit"}</span><b>${w.p}%</b></div><div class="bar"><i style="width:${Math.min(100, w.p)}%;background:${level(w.p)}"></i></div><div class="r"><small>${w.reset}</small></div></div>`).join("")}
-      <button class="mini-btn" data-usage="${esc(a.account)}">Full usage page ↗</button></div>`).join("")
-      || `<p class="note">Plan limits appear after your next message in Claude Code.</p>`}
-    ${(usage.other_accounts || []).map(e => `<div class="card2"><h4><span>${esc(e.label)}</span><small>${esc(e.sub)}</small></h4><p class="note" style="margin:0">Its limits live on claude.ai. This opens them in the right Chrome profile.</p><button class="mini-btn" ${e.profile ? `data-uprof="${esc(e.profile)}"` : `data-usage="${esc(e.email)}"`}>Open usage ↗</button></div>`).join("")}
-    <div class="card2"><h4><span>Tokens processed</span><small>today ${mTok(usage.tokens.today)} · 5h ${mTok(usage.tokens.h5)} · 7d ${mTok(usage.tokens.week)}</small></h4>
-      <div class="spark">${usage.days.map(d => `<div class="${d.date === todayKey ? "today" : ""}" title="${d.date}: ${mTok(d.tokens)}"><i style="height:${Math.round(d.tokens / max * 100)}%"></i><small>${new Date(d.date + "T00:00").toLocaleDateString([], {weekday: "narrow"})}</small></div>`).join("")}</div>
+    ${accts.map(a => `<div class="card2"><h4><span>${esc(a.account)}</span><small>${t("as_of", {t: hm(a.updated)})}</small></h4>
+      ${a.w.map(w => `<div class="meter"><div class="r"><span>${w.label === t("five") ? t("five_limit") : t("week_limit")}</span><b>${w.p}%</b></div><div class="bar"><i style="width:${Math.min(100, w.p)}%;background:${level(w.p)}"></i></div><div class="r"><small>${w.reset}</small></div></div>`).join("")}
+      <button class="mini-btn" data-usage="${esc(a.account)}">${t("full_usage")}</button></div>`).join("")
+      || `<p class="note">${t("plan_later")}</p>`}
+    ${(usage.other_accounts || []).map(e => `<div class="card2"><h4><span>${esc(e.label)}</span><small>${esc(e.sub)}</small></h4><p class="note" style="margin:0">${t("chrome_limits")}</p><button class="mini-btn" ${e.profile ? `data-uprof="${esc(e.profile)}"` : `data-usage="${esc(e.email)}"`}>${t("open_usage")}</button></div>`).join("")}
+    <div class="card2"><h4><span>${t("tokens_proc")}</span><small>${t("today")} ${mTok(usage.tokens.today)} · ${t("five")} ${mTok(usage.tokens.h5)} · 7${t("u_d")} ${mTok(usage.tokens.week)}</small></h4>
+      <div class="spark">${usage.days.map(d => `<div class="${d.date === todayKey ? "today" : ""}" title="${d.date}: ${mTok(d.tokens)}"><i style="height:${Math.round(d.tokens / max * 100)}%"></i><small>${new Date(d.date + "T00:00").toLocaleDateString(LOCALE(), {weekday: "narrow"})}</small></div>`).join("")}</div>
       ${usage.top.length ? `<div>${usage.top.map(a => { const s = data.find(x => x.id === a.id) || a; return row(s, mTok(a.tokens), s.status ? undefined : "rest"); }).join("")}</div>` : ""}
     </div>
-    <div class="card2"><h4><span>Tired agents</span><small>${tired.length ? "restart to save tokens" : "all fresh"}</small></h4>
-      ${tired.map(s => row(s, `Day ${s.life.age_days} · ${kTok(s.context_tokens)}`)).join("") || `<p class="note" style="margin:0">No agent is too old or too big.</p>`}</div>`;
+    <div class="card2"><h4><span>${t("tired_agents")}</span><small>${tired.length ? t("restart_save") : t("all_fresh")}</small></h4>
+      ${tired.map(s => row(s, `${t("day", {n: s.life.age_days})} · ${kTok(s.context_tokens)}`)).join("") || `<p class="note" style="margin:0">${t("none_tired")}</p>`}</div>`;
 }
 
 // ---------- Sheet: Chrome tabs ----------
 function tabsSheet(){
-  if (!tabsData) { loadTabs(); return `<p class="note">Reading Chrome tabs…</p>`; }
-  if (tabsErr) return `<p class="note">${esc(tabsErr)}</p>`;
+  if (!tabsData) { loadTabs(); return `<p class="note">${t("reading_tabs")}</p>`; }
+  if (tabsErr) return `<p class="note">${/extension|macOS only/i.test(tabsErr) ? t("needs_ext") : esc(tabsErr)}</p>`;
   const q = ($("#tabQ") && $("#tabQ").value || "").toLowerCase();
   const isClaude = t => t.agents || t.claude;
   const profs = [...new Map(tabsData.filter(t => t.profile).map(t => [t.profile, t])).values()];
@@ -683,31 +789,31 @@ function tabsSheet(){
   const list = tabsData.filter(t => (tabScope === "all" || (tabScope === "live" ? t.live : isClaude(t))) && (!tabProfile || t.profile === tabProfile))
     .filter(t => !q || [t.title, t.url, ...(t.agents || []).map(a => a.title)].join(" ").toLowerCase().includes(q));
   const count = {}; tabsData.forEach(t => count[t.url] = (count[t.url] || 0) + 1);
-  return `<div class="seg">${[["live","Active"],["claude","Claude"],["all","All"]].map(([k, l]) => `<button class="${tabScope === k ? "on" : ""}" data-scope="${k}">${l} ${n[k]}</button>`).join("")}</div>
-    ${profs.length > 1 ? `<div class="seg"><button class="${!tabProfile ? "on" : ""}" data-prof="">All accounts</button>${profs.map(p => `<button class="${tabProfile === p.profile ? "on" : ""}" data-prof="${esc(p.profile)}" title="${esc(p.profile_email)}">${esc(p.profile_name)}</button>`).join("")}</div>` : ""}
-    <input class="search" id="tabQ" type="search" placeholder="Find a tab…" value="${esc(q)}" style="width:100%;display:block">
+  return `<div class="seg">${[["live",t("active")],["claude",t("claude")],["all",t("all")]].map(([k, l]) => `<button class="${tabScope === k ? "on" : ""}" data-scope="${k}">${l} ${n[k]}</button>`).join("")}</div>
+    ${profs.length > 1 ? `<div class="seg"><button class="${!tabProfile ? "on" : ""}" data-prof="">${t("all_accounts")}</button>${profs.map(p => `<button class="${tabProfile === p.profile ? "on" : ""}" data-prof="${esc(p.profile)}" title="${esc(p.profile_email)}">${esc(p.profile_name)}</button>`).join("")}</div>` : ""}
+    <input class="search" id="tabQ" type="search" placeholder="${t("find_tab")}" value="${esc(q)}" style="width:100%;display:block">
     <div class="list">${list.map(t => `<div class="trow ${t.live ? "live" : ""}" data-w="${t.window}" data-t="${t.tab}" title="${esc(t.url)}">
         <span class="fav" style="${t.profile_email ? `background:${colorOf(t.profile_email)};color:#fff` : ""}">${esc((host(t.url) || "?")[0])}</span>
         <span class="tt"><b>${esc(t.title || t.url)}</b><small>${esc(host(t.url))}${t.profile_email ? " · " + esc(t.profile_email) : ""}</small></span>
         ${t.claude ? `<span class="tag">${esc(t.claude)}</span>` : ""}${(t.agents || []).slice(0, 1).map(a => `<span class="tag">${a.live ? "● " : ""}${esc(a.title)}</span>`).join("")}
         ${count[t.url] > 1 ? `<span class="tag" style="background:var(--soft);color:var(--muted)">×${count[t.url]}</span>` : ""}</div>`).join("")
-      || `<p class="note">${tabScope === "live" ? "No Claude agent is using a Chrome tab right now." : "No tabs match."}</p>`}</div>`;
+      || `<p class="note">${tabScope === "live" ? t("no_live") : t("no_tabs")}</p>`}</div>`;
 }
 
 // ---------- Sheet: trash ----------
 function trashSheet(){
-  return trash.length ? `<div class="list">${trash.slice().reverse().map(t => `<div class="nap">${buddy("sleep", colorOf(t.project), {size: 28})}<span class="t"><b>${esc(t.title)}</b><small>${esc(t.project)} · deleted ${ago(t.deleted_at)} ago</small></span><button class="mini-btn" data-restore="${esc(t.id)}">Restore</button></div>`).join("")}</div>
-    <button class="btn warn" id="emptyTrash">Empty trash for good</button>` : `<div class="empty" style="padding:30px 0">${buddy("done", "var(--b6)", {size: 50})}Trash is empty.</div>`;
+  return trash.length ? `<div class="list">${trash.slice().reverse().map(t => `<div class="nap">${buddy("sleep", colorOf(t.project), {size: 28})}<span class="t"><b>${esc(t.title)}</b><small>${esc(t.project)} · ${tr("deleted_ago", {t: ago(t.deleted_at)})}</small></span><button class="mini-btn" data-restore="${esc(t.id)}">${tr("restore")}</button></div>`).join("")}</div>
+    <button class="btn warn" id="emptyTrash">${t("empty_trash")}</button>` : `<div class="empty" style="padding:30px 0">${buddy("done", "var(--b6)", {size: 50})}${t("trash_empty")}</div>`;
 }
 
-const SHEETS = {agent: "Agent", usage: "Usage", tabs: "Chrome tabs", trash: "Trash"};
+const SHEETS = {get agent(){ return t("sh_agent"); }, get usage(){ return t("sh_usage"); }, get tabs(){ return t("sh_tabs"); }, get trash(){ return t("sh_trash"); }};
 let sheetSig = "";
 function renderSheet(force){
   const open = !!sheet.kind;
   $("#sheet").classList.toggle("open", open); $("#scrim").classList.toggle("open", open); $("#sheet").setAttribute("aria-hidden", String(!open));
   if (!open) return;
   let html;
-  if (sheet.kind === "agent") { const s = data.find(x => x.id === sheet.id); if (!s) { closeSheet(); toast("That agent is no longer on the board"); return; } html = agentSheet(s); }
+  if (sheet.kind === "agent") { const s = data.find(x => x.id === sheet.id); if (!s) { closeSheet(); toast(t("gone")); return; } html = agentSheet(s); }
   else html = sheet.kind === "usage" ? usageSheet() : sheet.kind === "tabs" ? tabsSheet() : trashSheet();
   if (!force && html === sheetSig) return;
   const b = $("#sheetB"), top = b.scrollTop, focusQ = document.activeElement && document.activeElement.id === "tabQ", caret = focusQ ? document.activeElement.selectionStart : 0;
@@ -723,13 +829,14 @@ function render(){ renderNow(); renderRooms(); renderSheet(false); $("#trashN").
 async function load(){
   try {
     const j = await (await fetch(`/api/sessions?days=${$("#days").value}`)).json();
+    if (j.lang && (j.lang !== LANG || j.language !== LANG_SETTING)) { LANG = j.lang; LANG_SETTING = j.language || "auto"; applyStatic(); applyPrefs(); lastSig = ""; }
     personalHours = j.personal_hours; windowOpen = j.personal_window_open; trash = j.trash || []; usage = j.usage || null;
     if (!spaceInfo || spaceInfo.space !== j.space.space) spaceChanged(j.space); else spaceInfo = j.space;
     renderSpace();
-    lastOk = Date.now(); $("#live").classList.remove("off"); $("#live").title = "Live · updated " + new Date().toLocaleTimeString();
+    lastOk = Date.now(); $("#live").classList.remove("off"); $("#live").title = t("live_upd", {t: new Date().toLocaleTimeString(LOCALE())});
     const sig = JSON.stringify(j.sessions) + trash.length + JSON.stringify(usage);
     if (sig !== lastSig || Math.floor(Date.now() / 60000) !== Math.floor(now / 60)) { data = j.sessions; now = j.now; lastSig = sig; render(); animateChanges(); }
-  } catch { $("#live").classList.add("off"); $("#live").title = "Board server not reachable"; }
+  } catch { $("#live").classList.add("off"); $("#live").title = t("unreachable"); }
 }
 async function loadTabs(){
   try { const j = await (await fetch("/api/tabs")).json(); tabsData = j.tabs; tabsErr = j.error || ""; }
@@ -742,32 +849,32 @@ async function loadTabs(){
 
 // ---------- actions ----------
 let toastTimer;
-function toast(t, undo){
-  const el = $("#toast"); el.textContent = t;
-  if (undo) { const b = document.createElement("button"); b.textContent = "Undo"; b.onclick = () => { el.classList.remove("show"); undo(); }; el.append(b); }
+function toast(msg, undo){
+  const el = $("#toast"); el.textContent = msg;
+  if (undo) { const b = document.createElement("button"); b.textContent = t("undo"); b.onclick = () => { el.classList.remove("show"); undo(); }; el.append(b); }
   el.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), undo ? 6000 : 2000);
 }
 async function post(url, body){
   const r = await fetch(url, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(body)});
-  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || "Something went wrong"); return j;
+  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || t("wrong")); return j;
 }
 async function act(kind, id){
   try { await post(`/api/session/${kind}`, {id});
-    if (kind === "delete") { toast("Moved to trash", () => restore(id)); if (sheet.id === id) closeSheet(); }
-    else toast(kind === "keep" ? "Kept. It won't be flagged again until it's idle again." : "Hidden");
+    if (kind === "delete") { toast(t("moved_trash"), () => restore(id)); if (sheet.id === id) closeSheet(); }
+    else toast(kind === "keep" ? t("kept") : t("hidden"));
   } catch (e) { toast(e.message); }
   lastSig = ""; load();
 }
-async function restore(id){ try { await post("/api/trash/restore", {id}); toast("Restored"); } catch (e) { toast(e.message); } lastSig = ""; await load(); }
+async function restore(id){ try { await post("/api/trash/restore", {id}); toast(t("restored")); } catch (e) { toast(e.message); } lastSig = ""; await load(); }
 async function classify(key, category){
-  try { await post("/api/classify", {key, category}); toast(`Moved to ${category[0].toUpperCase() + category.slice(1)}`); } catch (e) { toast(e.message); }
+  try { await post("/api/classify", {key, category}); toast(t("moved_to", {x: t(category)})); } catch (e) { toast(e.message); }
   lastSig = ""; load();
 }
 async function copy(text, msg){
   try { await navigator.clipboard.writeText(text); toast(msg); }
   catch {   // inside the Agent Board app window, the app copies for us
     const h = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.copy;
-    if (h) { h.postMessage(text); toast(msg); } else toast("Couldn't access the clipboard");
+    if (h) { h.postMessage(text); toast(msg); } else toast(t("clip_fail"));
   }
 }
 function handoff(s){
@@ -794,7 +901,7 @@ function spaceChanged(info){
   const first = !spaceInfo; spaceInfo = info;
   document.body.dataset.space = info.space;
   if (first) return;
-  seen = null; riverItems.length = 0; $("#riverTrack").innerHTML = `<span class="river-empty">Activity from your agents will flow here.</span>`;
+  seen = null; riverItems.length = 0; $("#riverTrack").innerHTML = `<span class="river-empty">${t("river_empty")}</span>`;
   tabsData = null; tabProfile = ""; moodFilter = ""; lastSig = "";
   if (sheet.kind) closeSheet();
   loadTabs();
@@ -802,11 +909,11 @@ function spaceChanged(info){
 function renderSpace(){
   if (!spaceInfo) return;
   document.querySelectorAll("#spaceSw button").forEach(b => b.classList.toggle("on", b.dataset.space === spaceInfo.space));
-  const until = new Date(spaceInfo.until * 1000).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
-  $("#spaceNote").textContent = spaceInfo.manual ? `until ${until}` : `auto · switches ${until}`;
+  const until = new Date(spaceInfo.until * 1000).toLocaleTimeString(LOCALE(), {hour: "2-digit", minute: "2-digit"});
+  $("#spaceNote").textContent = spaceInfo.manual ? t("until", {t: until}) : t("auto_sw", {t: until});
   const guarded = spaceInfo.space === "personal" && spaceInfo.auto === "work";
   $("#guard").hidden = !guarded;
-  if (guarded) $("#guard").innerHTML = `<b>Personal</b> during work hours. It switches back to Work after 10 minutes without activity.`;
+  if (guarded) $("#guard").innerHTML = t("guard");
 }
 async function switchSpace(space){
   try { const info = await post("/api/space", {space: space === spaceInfo?.auto ? "auto" : space}); spaceChanged(info); renderSpace(); lastSig = ""; await load(); }
@@ -817,7 +924,7 @@ let lastActive = Date.now();
 ["pointermove", "keydown", "click", "scroll", "touchstart"].forEach(ev => addEventListener(ev, () => { lastActive = Date.now(); }, {passive: true}));
 setInterval(() => {
   if (spaceInfo && spaceInfo.space === "personal" && spaceInfo.auto === "work" && Date.now() - lastActive > 10 * 60 * 1000) {
-    switchSpace("work"); toast("Back to Work");
+    switchSpace("work"); toast(t("back_work"));
   }
 }, 15000);
 document.addEventListener("visibilitychange", () => { if (document.hidden) lastActive = Math.min(lastActive, Date.now()); });
@@ -828,8 +935,8 @@ try { Object.assign(prefs, JSON.parse(localStorage.getItem("ab-prefs") || "{}"))
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 function savePrefs(){ try { localStorage.setItem("ab-prefs", JSON.stringify(prefs)); } catch {} applyPrefs(); }
 function applyPrefs(){
-  $("#soundState").textContent = prefs.sound ? "on" : "off"; $("#soundState").classList.toggle("on", prefs.sound);
-  $("#riverState").textContent = prefs.river ? "on" : "off"; $("#riverState").classList.toggle("on", prefs.river);
+  $("#soundState").textContent = prefs.sound ? t("on") : t("off"); $("#soundState").classList.toggle("on", prefs.sound);
+  $("#riverState").textContent = prefs.river ? t("on") : t("off"); $("#riverState").classList.toggle("on", prefs.river);
   $("#river").hidden = !prefs.river; document.body.classList.toggle("has-river", prefs.river);
 }
 // Sounds are generated (no audio files); browsers only allow them after your first click on the page.
@@ -907,30 +1014,30 @@ function animateChanges(){
 
 // One click handler for the whole page.
 document.addEventListener("click", async e => {
-  const t = e.target;
-  if (!t.closest("#menu,#moreBtn")) $("#menu").hidden = true;
-  const link = t.closest("a.open-link");
+  const tgt = e.target;
+  if (!tgt.closest("#menu,#moreBtn")) $("#menu").hidden = true;
+  const link = tgt.closest("a.open-link");
   if (link && !e.metaKey && !e.ctrlKey) { e.preventDefault();
-    try { const j = await post("/api/tabs/open", {url: link.href}); toast(j.result === "focused" ? "Switched to the open tab" : "Opened in Chrome"); }
+    try { const j = await post("/api/tabs/open", {url: link.href}); toast(j.result === "focused" ? t("switched_open") : t("opened_chrome")); }
     catch { window.open(link.href, "_blank", "noopener"); } return; }
-  const el = t.closest("[data-act],[data-open],[data-w],[data-mood],[data-key],[data-handoff],[data-copy],[data-usage],[data-uprof],[data-restore],[data-scope],[data-prof],#usageBtn,#emptyTrash");
+  const el = tgt.closest("[data-act],[data-open],[data-w],[data-mood],[data-key],[data-handoff],[data-copy],[data-usage],[data-uprof],[data-restore],[data-scope],[data-prof],#usageBtn,#emptyTrash");
   if (!el) return;
   if (el.dataset.act) return act(el.dataset.act, el.dataset.id);
   if (el.dataset.open) { if (document.body.classList.contains("tv")) return; return openSheet("agent", el.dataset.open); }
-  if (el.dataset.w) { try { await post("/api/tabs/focus", {window: +el.dataset.w, tab: +el.dataset.t}); toast("Switched to the tab"); } catch (err) { toast(err.message); } return; }
+  if (el.dataset.w) { try { await post("/api/tabs/focus", {window: +el.dataset.w, tab: +el.dataset.t}); toast(t("switched_tab")); } catch (err) { toast(err.message); } return; }
   if (el.dataset.mood) { moodFilter = moodFilter === el.dataset.mood ? "" : el.dataset.mood; renderNow(); renderRooms(); return; }
   if (el.dataset.key && el.dataset.cat) return classify(el.dataset.key, el.dataset.cat);
-  if (el.dataset.handoff) { const s = data.find(x => x.id === el.dataset.handoff); return copy(handoff(s), "Handoff copied: paste it into a new Claude session"); }
-  if (el.dataset.copy) return copy(el.dataset.copy, el.dataset.msg || "Copied");
-  if (el.dataset.uprof) { try { await post("/api/open-in-profile", {url: "https://claude.ai/settings/usage", profile: el.dataset.uprof}); toast("Opened in Chrome"); } catch (err) { toast(err.message); } return; }
-  if (el.dataset.usage) { try { await post("/api/open-in-profile", {url: "https://claude.ai/settings/usage", email: el.dataset.usage}); toast("Opened in Chrome"); } catch (err) { toast(err.message); } return; }
+  if (el.dataset.handoff) { const s = data.find(x => x.id === el.dataset.handoff); return copy(handoff(s), t("handoff_copied")); }
+  if (el.dataset.copy) return copy(el.dataset.copy, el.dataset.msg || t("copied"));
+  if (el.dataset.uprof) { try { await post("/api/open-in-profile", {url: "https://claude.ai/settings/usage", profile: el.dataset.uprof}); toast(t("opened_chrome")); } catch (err) { toast(err.message); } return; }
+  if (el.dataset.usage) { try { await post("/api/open-in-profile", {url: "https://claude.ai/settings/usage", email: el.dataset.usage}); toast(t("opened_chrome")); } catch (err) { toast(err.message); } return; }
   if (el.dataset.restore) return restore(el.dataset.restore);
   if (el.dataset.scope) { tabScope = el.dataset.scope; return renderSheet(true); }
   if (el.dataset.prof !== undefined) { tabProfile = el.dataset.prof; return renderSheet(true); }
   if (el.id === "usageBtn") return openSheet("usage");
   if (el.id === "emptyTrash") {
-    if (!confirm(`Permanently delete ${trash.length} agent${trash.length > 1 ? "s" : ""}? This can't be undone.`)) return;
-    try { const j = await post("/api/trash/empty", {}); toast(`Permanently deleted ${j.removed}`); } catch (err) { toast(err.message); }
+    if (!confirm(t("confirm_empty", {n: trash.length}))) return;
+    try { const j = await post("/api/trash/empty", {}); toast(t("deleted_n", {n: j.removed})); } catch (err) { toast(err.message); }
     lastSig = ""; await load(); renderSheet(true);
   }
 });
@@ -949,10 +1056,16 @@ $("#tabsBtn").addEventListener("click", () => openSheet("tabs"));
 $("#spaceSw").addEventListener("click", e => { const b = e.target.closest("[data-space]"); if (b && b.dataset.space !== spaceInfo?.space) switchSpace(b.dataset.space); });
 $("#moreBtn").addEventListener("click", () => { const m = $("#menu"); m.hidden = !m.hidden; $("#moreBtn").setAttribute("aria-expanded", String(!m.hidden)); });
 $("#mReport").addEventListener("click", () => { $("#menu").hidden = true; $("#dlg").showModal(); });
-$("#mDigest").addEventListener("click", () => { $("#menu").hidden = true; copy(digest(), "Digest copied as Markdown"); });
+$("#mDigest").addEventListener("click", () => { $("#menu").hidden = true; copy(digest(), t("digest_copied")); });
 $("#mUsage").addEventListener("click", () => { $("#menu").hidden = true; openSheet("usage"); });
 $("#mTrash").addEventListener("click", () => { $("#menu").hidden = true; openSheet("trash"); });
 $("#days").addEventListener("change", () => { lastSig = ""; load(); });
+$("#langSel").addEventListener("change", async e => {
+  try { const r = await post("/api/settings", {language: e.target.value}); LANG = r.lang; LANG_SETTING = r.language;
+        applyStatic(); applyPrefs(); lastSig = ""; sheetSig = ""; await load(); renderSheet(true);
+        toast(t("lang_set", {x: LANG === "ko" ? "한국어" : "English"})); }
+  catch (err) { toast(err.message); }
+});
 function tv(on){
   document.body.classList.toggle("tv", on);
   if (on) { closeSheet(); $("#menu").hidden = true; document.documentElement.requestFullscreen?.().catch(() => {}); history.replaceState(null, "", "#tv"); }
@@ -966,11 +1079,11 @@ $("#mSound").addEventListener("click", () => { prefs.sound = !prefs.sound; saveP
 $("#mRiver").addEventListener("click", () => { prefs.river = !prefs.river; savePrefs(); });
 applyPrefs();
 $("#scratch").addEventListener("change", () => { try { localStorage.setItem("ab-scratch", $("#scratch").checked ? "1" : "0"); } catch {} render(); });
-$("#copyInstr").addEventListener("click", () => copy($("#chromeInstr").textContent, "Instructions copied"));
+$("#copyInstr").addEventListener("click", () => copy($("#chromeInstr").textContent, t("instr_copied")));
 $("#dlg").addEventListener("close", async () => {
   if ($("#dlg").returnValue !== "ok") return;
   const body = Object.fromEntries(new FormData($("#rform"))); body.source = "Manual report"; if (!body.url) delete body.url;
-  try { await post("/api/event", body); toast("Saved"); } catch (e) { toast(e.message); }
+  try { await post("/api/event", body); toast(t("saved")); } catch (e) { toast(e.message); }
   $("#rform").querySelector("textarea").value = ""; load();
 });
 // /report?agent=…&status=…&message=…&url=… opens the form pre-filled; saving still takes a click here,
@@ -986,7 +1099,7 @@ function applyHash(){
   const m = /^#(s|idle)=(.+)$/.exec(location.hash); if (!m || !data.length) return;
   if (m[1] === "idle") { $("#sleep")?.scrollIntoView({block: "start"}); return; }
   const id = decodeURIComponent(m[2]), s = data.find(x => x.id === id);
-  if (!s) { toast("That agent is no longer on the board"); return; }
+  if (!s) { toast(t("gone")); return; }
   if (s.is_scratch) $("#scratch").checked = true;
   openSheet("agent", id);
 }

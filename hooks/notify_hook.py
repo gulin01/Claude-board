@@ -12,6 +12,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import common  # noqa: E402
+import i18n  # noqa: E402
 from server import clean_prompt, extract_links  # noqa: E402
 
 
@@ -71,13 +72,14 @@ def main():
     event = data.get("hook_event_name")
     cwd = data.get("cwd") or ""
     cfg = common.load_config()
+    lang = i18n.language(cfg)
     category = common.category_for(cwd, cfg)
     project = common.leaf(cwd) or "Claude"
     if common.is_scratch(cwd):
-        project = "No folder"
+        project = i18n.t("no_folder", lang)
 
     title, first_prompt, last_text, files = read_turn(data.get("transcript_path"))
-    task = title or first_sentence(first_prompt or "", 60) or "Claude session"
+    task = title or first_sentence(first_prompt or "", 60) or i18n.t("session", lang)
     # Agent memory/scratch files don't count as project changes.
     files = {f for f in files if f and common.under(f, cwd)}
 
@@ -88,26 +90,26 @@ def main():
     if event == "Stop":
         if data.get("stop_hook_active"):
             return
-        summary = first_sentence(last_text) or "Finished"
+        summary = first_sentence(last_text) or i18n.t("finished", lang)
         n = len(files)
-        body = (f"{n} file{'s' if n != 1 else ''} changed · " if n else "") + summary
+        body = (i18n.files_changed(n, lang) + " · " if n else "") + summary
         # If the agent's final message has a link (preview, PR, ticket…), clicking opens that;
         # the "View on board" button opens its card.
         links = extract_links(last_text)
         if links:
             body += f"  ↗ {links[0][:60]}"
-        common.notify(category, head + "✅ Done", task, body, cfg, url=links[0] if links else link, nid=sid,
+        common.notify(category, head + i18n.t("done", lang), task, body, cfg, url=links[0] if links else link, nid=sid,
                       board_url=link if links else None)
     elif event == "Notification":
         msg = data.get("message") or "Needs your input"
         if data.get("notification_type") == "idle_prompt" or "waiting for your input" in msg.lower():
             return  # already covered by the Stop notification
-        common.notify(category, head + "⏳ Needs you", task, msg.replace("Claude needs your", "Needs your"), cfg,
+        common.notify(category, head + i18n.t("needs_you", lang), task, i18n.permission_message(msg, lang), cfg,
                       url=link, nid=sid)
     elif event == "PreToolUse" and data.get("tool_name") == "AskUserQuestion":
         qs = (data.get("tool_input") or {}).get("questions") or [{}]
-        common.notify(category, head + "❓ Question", task,
-                      first_sentence(qs[0].get("question"), 100) or "Has a question for you", cfg, url=link, nid=sid)
+        common.notify(category, head + i18n.t("question", lang), task,
+                      first_sentence(qs[0].get("question"), 100) or i18n.t("has_question", lang), cfg, url=link, nid=sid)
 
 
 if __name__ == "__main__":

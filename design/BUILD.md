@@ -43,9 +43,9 @@ work through the first unchecked item. Commit after each checked item.
 - [x] Test (Mac + simulated), commit, push
 
 ## Language · English / 한국어
-- [ ] Setting: language (auto/en/ko) in settings, /api/settings, sent to board + summary
-- [ ] Notifications + idle reminders translated
-- [ ] Board: all labels translated, Language menu
+- [x] Setting: language (auto/en/ko) in settings, /api/settings, sent to board + summary
+- [x] Notifications + idle reminders translated
+- [x] Board: all labels translated, Language menu
 - [ ] Tray (Windows) + menu-bar buddy (Mac) use labels from the server
 - [ ] setup.py asks language first and speaks it; README.ko.md; CLAUDE.md language note
 - [ ] Test both languages, commit, push

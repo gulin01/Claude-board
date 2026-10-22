@@ -12,6 +12,7 @@ import threading
 import time
 
 import common
+import i18n
 
 DATA_DIR = common.DATA_DIR
 STATE_FILE = os.path.join(DATA_DIR, "cleanup.json")
@@ -90,9 +91,10 @@ def check_and_notify(sessions, now=None):
                 common.log(f"SKIP  [{cat}] {project} · 💤 {len(group)} idle  (personal project outside notify hours)")
                 continue   # try again on a later check, inside the window
             n = len(group)
-            title = f"{project}  ·  💤 {n} idle agent{'s' if n > 1 else ''}"
+            lang = i18n.language(cfg)
+            title = f"{project}  ·  " + (i18n.t("idle_one", lang) if n == 1 else i18n.t("idle_many", lang, n=n))
             subtitle = ", ".join(s["title"] for s in group[:3]) + (f" +{n - 3}" if n > 3 else "")
-            body = "Unused for 24h+ · click to keep or delete"
+            body = i18n.t("idle_body", lang)
             link = common.board_link("s=" + group[0]["id"] if n == 1 else "idle=" + cat)
             common.notify(cat, title, subtitle, body, cfg, url=link, nid="idle-" + project)
             for s in group:

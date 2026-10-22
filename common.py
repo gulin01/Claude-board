@@ -69,6 +69,8 @@ DEFAULT_CONFIG = {
     "sound": "Glass",
     # Remind about agents unused this long (cleanup.py).
     "stale_after_hours": 24,
+    # Language for the board, notifications and buddies: "auto" (follow the computer), "en" or "ko".
+    "language": "auto",
     # Longevity: agents older than this many days, or with a context bigger than this, should be restarted.
     "fresh_days": 2,
     "context_warn_k": 250,

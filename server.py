@@ -23,6 +23,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
 import chrome
+import i18n
 import cleanup
 import common
 
@@ -533,7 +534,7 @@ def summary(now, space=None):
         plan.append({"account": a["account"], "five": pct("five_hour"), "week": pct("seven_day")})
     return {"need": by.get("need", []), "work": by.get("work", []), "done": len(by.get("done", [])),
             "tired": len(by.get("tired", [])), "asleep": len(by.get("sleep", [])), "plan": plan,
-            "space": common.space_info(cfg, now)}
+            "space": common.space_info(cfg, now), "lang": i18n.language(cfg), "labels": i18n.labels(i18n.language(cfg))}
 
 
 def add_event(body):
@@ -557,7 +558,8 @@ def add_event(body):
     os.makedirs(DATA_DIR, exist_ok=True)
     with _lock, open(EVENTS_FILE, "a", encoding="utf-8") as fh:
         fh.write(json.dumps(e, ensure_ascii=False) + "\n")
-    label = {"done": "✅ Done", "needs_input": "⏳ Needs you", "blocked": "⏳ Blocked"}.get((e["status"] or "").lower())
+    key = {"done": "done", "needs_input": "needs_you", "blocked": "blocked"}.get((e["status"] or "").lower())
+    label = i18n.t(key) if key else None
     if label:
         # Clicking opens the page the agent is working on (e.g. its Chrome tab), else its card on the board.
         link = e["url"] or common.board_link("s=ext-" + re.sub(r"\W+", "-", e["agent"].lower()))
@@ -666,6 +668,8 @@ class Handler(BaseHTTPRequestHandler):
         space = space if space in common.CATEGORIES else common.current_space(cfg)
         if u.path == "/api/space":
             return self._send(200, common.space_info(cfg))
+        if u.path == "/api/settings":
+            return self._send(200, {"language": cfg.get("language", "auto"), "lang": i18n.language(cfg)})
         if u.path == "/api/summary":
             return self._send(200, summary(time.time(), space))
         if u.path == "/api/tabs":
@@ -702,6 +706,7 @@ class Handler(BaseHTTPRequestHandler):
             trash = [t for t in cleanup.trash_list() if common.in_space(common.category_for(t["project"], cfg), space)]
             return self._send(200, {"now": now, "sessions": cleanup.annotate(shown, now), "usage": usage,
                                     "trash": trash, "space": common.space_info(cfg, now),
+                                    "lang": i18n.language(cfg), "language": cfg.get("language", "auto"),
                                     "personal_hours": cfg["personal_notify_hours"],
                                     "personal_window_open": common.in_personal_window(cfg)})
         self._send(404, {"error": "not found"})
@@ -712,7 +717,7 @@ class Handler(BaseHTTPRequestHandler):
         route = urlparse(self.path).path
         if route not in ("/api/event", "/api/classify", "/api/session/keep", "/api/session/delete",
                          "/api/session/hide", "/api/trash/restore", "/api/trash/empty",
-                         "/api/tabs/focus", "/api/tabs/open", "/api/open-in-profile", "/api/space"):
+                         "/api/tabs/focus", "/api/tabs/open", "/api/open-in-profile", "/api/space", "/api/settings"):
             return self._send(404, {"error": "not found"})
         # Refuse cross-site browser posts; allow curl/scripts and the board itself.
         origin = self.headers.get("Origin")
@@ -735,6 +740,14 @@ class Handler(BaseHTTPRequestHandler):
             if route == "/api/tabs/focus":
                 chrome.focus(body.get("window"), body.get("tab"))
                 return self._send(200, {"ok": True})
+            if route == "/api/settings":
+                lang = str(body.get("language") or "")
+                if lang not in ("auto",) + i18n.LANGS:
+                    raise ValueError("language must be auto, en or ko")
+                cfg = common.load_config()
+                cfg["language"] = lang
+                common.save_config(cfg)
+                return self._send(200, {"language": lang, "lang": i18n.language(cfg)})
             if route == "/api/space":
                 return self._send(200, common.set_space(str(body.get("space") or "")))
             if route == "/api/open-in-profile":
