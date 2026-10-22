@@ -13,7 +13,7 @@ import time
 
 import common
 
-DATA_DIR = os.path.join(common.HERE, "data")
+DATA_DIR = common.DATA_DIR
 STATE_FILE = os.path.join(DATA_DIR, "cleanup.json")
 TRASH_DIR = os.path.join(DATA_DIR, "trash")
 SESSION_ID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")

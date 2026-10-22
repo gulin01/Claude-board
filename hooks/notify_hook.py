@@ -2,7 +2,7 @@
 """Claude Code hook: macOS notification when an agent finishes or needs you.
 
 Registered for Stop, Notification and PreToolUse(AskUserQuestion) in ~/.claude/settings.json.
-Work projects always notify; personal projects only inside personal_notify_hours (config.json).
+Work projects always notify; personal projects only inside personal_notify_hours (~/.agent-board/config.json).
 Never blocks Claude: every failure exits 0 silently (and is logged).
 """
 import json

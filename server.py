@@ -26,7 +26,7 @@ import common
 HOME = os.path.expanduser("~")
 PROJECTS_DIR = os.environ.get("AGENT_BOARD_PROJECTS", os.path.join(HOME, ".claude", "projects"))
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(HERE, "data")
+DATA_DIR = common.DATA_DIR
 EVENTS_FILE = os.path.join(DATA_DIR, "events.jsonl")
 PORT = int(os.environ.get("AGENT_BOARD_PORT", "4317"))
 

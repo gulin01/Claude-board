@@ -11,7 +11,8 @@ import time
 from datetime import datetime
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-USAGE_FILE = os.path.join(HERE, "data", "usage.json")
+USAGE_FILE = os.path.join(os.environ.get("AGENT_BOARD_HOME") or os.path.join(os.path.expanduser("~"), ".agent-board"),
+                          "data", "usage.json")   # same place as common.DATA_DIR, without importing it (keeps this fast)
 
 
 def first_day(path):

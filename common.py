@@ -21,8 +21,40 @@ def leaf(path):
     """Last folder name of a path, on any OS."""
     return os.path.basename(os.path.normpath(path)) if path else ""
 HERE = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FILE = os.path.join(HERE, "config.json")
-LOG_FILE = os.path.join(HERE, "data", "notify.log")
+# Your settings and data live OUTSIDE the project folder, so the code can be shared or pushed safely:
+#   macOS ~/.agent-board   ·   Windows C:\Users\<you>\.agent-board   ·   override with AGENT_BOARD_HOME
+AGENT_HOME = os.environ.get("AGENT_BOARD_HOME") or os.path.join(HOME, ".agent-board")
+DATA_DIR = os.path.join(AGENT_HOME, "data")
+CONFIG_FILE = os.path.join(AGENT_HOME, "config.json")
+LOG_FILE = os.path.join(DATA_DIR, "notify.log")
+
+
+def migrate_old_layout():
+    """Move config.json and data/ out of the project folder (older versions kept them inside)."""
+    old_cfg, old_data = os.path.join(HERE, "config.json"), os.path.join(HERE, "data")
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+        if os.path.exists(old_cfg) and not os.path.exists(CONFIG_FILE):
+            os.replace(old_cfg, CONFIG_FILE)
+        if os.path.isdir(old_data):
+            import shutil
+            for name in os.listdir(old_data):
+                src, dst = os.path.join(old_data, name), os.path.join(DATA_DIR, name)
+                if not os.path.exists(dst):
+                    shutil.move(src, dst)
+            state = os.path.join(DATA_DIR, "cleanup.json")   # trash entries remember where their files are
+            if os.path.exists(state):
+                with open(state, encoding="utf-8") as fh:
+                    text = fh.read()
+                with open(state, "w", encoding="utf-8") as fh:
+                    fh.write(text.replace(json.dumps(old_data)[1:-1], json.dumps(DATA_DIR)[1:-1]))
+            if not os.listdir(old_data):
+                os.rmdir(old_data)
+    except OSError:
+        pass
+
+
+migrate_old_layout()
 NOTIFIER = os.path.join(HERE, "notifier", "Agent Board.app", "Contents", "MacOS", "agent-board-notify")
 BOARD_URL = "http://127.0.0.1:4317/"
 CATEGORIES = ("work", "personal")
@@ -135,7 +167,7 @@ def in_personal_window(cfg=None, now=None):
     return start <= cur < end if start < end else (cur >= start or cur < end)
 
 
-SPACE_FILE = os.path.join(HERE, "data", "space.json")
+SPACE_FILE = os.path.join(DATA_DIR, "space.json")
 
 
 def _next_boundary(cfg, now):
