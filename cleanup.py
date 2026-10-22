@@ -54,6 +54,12 @@ def is_stale(s, st, now, limit):
     return st["kept"].get(s["id"]) != s["last_activity"]
 
 
+def is_hidden(s, st):
+    """Hidden until the agent does something new (then it comes back, so its notifications still open it)."""
+    at = st["hidden"].get(s["id"])
+    return at is not None and s["last_activity"] <= at
+
+
 def annotate(sessions, now):
     """Drop hidden sessions; mark stale / deletable ones for the board."""
     with _lock:
@@ -61,7 +67,7 @@ def annotate(sessions, now):
     limit = stale_after_secs()
     out = []
     for s in sessions:
-        if s["id"] in st["hidden"]:
+        if is_hidden(s, st):
             continue
         s["stale"] = is_stale(s, st, now, limit)
         # Desktop-app sessions are also listed in the app's sidebar; delete those there.
@@ -78,7 +84,7 @@ def check_and_notify(sessions, now=None):
     with _lock:
         st = load_state()
         fresh = [s for s in sessions
-                 if s["id"] not in st["hidden"] and not s.get("is_scratch")
+                 if not is_hidden(s, st) and not s.get("is_scratch")
                  and is_stale(s, st, now, limit)
                  and st["notified"].get(s["id"]) != s["last_activity"]]
         sent = 0
