@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Agent Board Tabs",
+  "version": "1.0",
+  "description": "Lets your local Agent Board find and switch to your Chrome tabs. Talks only to 127.0.0.1 on this computer.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtKEE0Ww7XwxCs8j65gkp4zhMiHT0A9//133bZJn/UKEFELfj4OACg1fmHo5WnWZLHE+OZ6zddWgDHSxEQ9AHVYY+z+X6KyJ4VhHC68J71teLU3aapeoO2GQo3Wy05WzngRFX/IfTSIOPdfNCeAd+pfwAZTF3q5wK0i2Uthb5UI3l3gO31f6bE6YhVBBp8DWERhEf41ejtLsNfYrDYndikGv0rXUJTv6xrS6ZXPFnS3EHI1B2csiKVT57g/otxK9iZX0p0DtV5So80hfNphJJQqyAVKUIvRpFSfeB0emLxQNIus35WjpsnbRA9KD5m7NnC252/pF4Z8XbAP0SBRfBOQIDAQAB",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "tabs",
+    "identity",
+    "identity.email",
+    "alarms"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:4317/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

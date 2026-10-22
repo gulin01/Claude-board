@@ -1,6 +1,10 @@
 """Find and switch to open Google Chrome tabs (via macOS scripting; no extension needed).
 
-On Windows the tab finder is off for now: links simply open in the default browser.
+Two ways to see tabs:
+  - the Agent Board Chrome extension (extension/, any OS): each Chrome profile reports its tabs over a live
+    connection and switches tabs on request. Preferred whenever it's connected.
+  - macOS only, without the extension: Chrome's AppleScript support.
+Without either (e.g. Windows without the extension), links simply open in the default browser.
 
 Incognito windows are never listed. Nothing here closes tabs or reads page contents:
 only each tab's title and URL.
@@ -12,6 +16,7 @@ import re
 import struct
 import subprocess
 import sys
+import threading
 import time
 import webbrowser
 from urllib.parse import urlsplit
@@ -22,6 +27,83 @@ CHROME_DIR = (os.path.join(os.environ.get("LOCALAPPDATA", ""), "Google", "Chrome
 _sess_cache = {}   # session file path -> (mtime, window ids, urls)
 
 _cache = {"at": 0.0, "tabs": None}
+
+EXTENSION_ID = "mfbbhdnaghpjhkjkgckcnlcebkmcnakl"   # fixed by the "key" in extension/manifest.json
+NEEDS_EXTENSION = "Load the Agent Board Chrome extension to find your tabs (see README → Chrome tab finder)."
+
+
+class Bridge:
+    """Live connections from the Chrome extension, one per Chrome profile."""
+
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.conns = {}   # id -> {"email", "tabs", "updated", "send"}
+        self.next_id = 0
+
+    def add(self, send):
+        with self.lock:
+            self.next_id += 1
+            self.conns[self.next_id] = {"email": "", "tabs": [], "updated": 0.0, "send": send}
+            return self.next_id
+
+    def remove(self, cid):
+        with self.lock:
+            self.conns.pop(cid, None)
+        _cache["tabs"] = None
+
+    def update(self, cid, email=None, tabs=None):
+        with self.lock:
+            c = self.conns.get(cid)
+            if not c:
+                return
+            if email is not None:
+                c["email"] = email
+            if tabs is not None:
+                c["tabs"], c["updated"] = tabs, time.time()
+        _cache["tabs"] = None
+
+    def connected(self):
+        with self.lock:
+            return bool(self.conns)
+
+    def snapshot(self):
+        with self.lock:
+            return [(cid, c["email"], list(c["tabs"])) for cid, c in self.conns.items()]
+
+    def send(self, cid, msg):
+        with self.lock:
+            c = self.conns.get(cid)
+        if c:
+            c["send"](msg)
+            return True
+        return False
+
+    def owner(self, window_id):
+        for cid, _email, tabs in self.snapshot():
+            if any(t["window"] == window_id for t in tabs):
+                return cid
+        return None
+
+
+bridge = Bridge()
+
+
+def _bridge_tabs():
+    """Tabs reported by the extension, tagged with their Chrome profile like the AppleScript path."""
+    by_email = {p["email"].lower(): (d, p) for d, p in profiles().items() if p["email"]}
+    out, windows = [], {}
+    for _cid, email, tabs in bridge.snapshot():
+        prof = by_email.get((email or "").lower())
+        for t in tabs:
+            wn = windows.setdefault(t["window"], len(windows) + 1)
+            item = {"window": t["window"], "wn": wn, "tab": t["tab"], "index": t.get("index", 0),
+                    "active": bool(t.get("active")), "title": t.get("title", ""), "url": t.get("url", "")}
+            if prof:
+                item.update(profile=prof[0], profile_name=prof[1]["name"], profile_email=prof[1]["email"])
+            elif email:
+                item.update(profile=email, profile_name=email, profile_email=email)
+            out.append(item)
+    return out
 
 
 def chrome_exe():
@@ -35,7 +117,7 @@ def chrome_exe():
 
 def _jxa(script, *args):
     if WINDOWS:
-        raise RuntimeError("The Chrome tab finder works on macOS only for now.")
+        raise RuntimeError(NEEDS_EXTENSION)
     r = subprocess.run(["osascript", "-l", "JavaScript", "-e", script, *args],
                        capture_output=True, text=True, timeout=15)
     if r.returncode != 0:
@@ -179,11 +261,14 @@ def open_in_profile(url, email=None, profile=None):
 def list_tabs(max_age=2.0):
     if _cache["tabs"] is not None and time.time() - _cache["at"] < max_age:
         return _cache["tabs"]
-    tabs = json.loads(_jxa(LIST) or "[]")
-    try:
-        _tag_profiles(tabs)
-    except Exception:
-        pass   # profile tags are a nice-to-have; never break the tab list
+    if bridge.connected():
+        tabs = _bridge_tabs()
+    else:
+        tabs = json.loads(_jxa(LIST) or "[]")
+        try:
+            _tag_profiles(tabs)
+        except Exception:
+            pass   # profile tags are a nice-to-have; never break the tab list
     for t in tabs:
         k = claude_kind(t["url"])
         if k:
@@ -193,6 +278,10 @@ def list_tabs(max_age=2.0):
 
 
 def focus(window_id, tab_id):
+    cid = bridge.owner(int(window_id)) if bridge.connected() else None
+    if cid:
+        bridge.send(cid, {"type": "focus", "window": int(window_id), "tab": int(tab_id)})
+        return
     _jxa(FOCUS, str(int(window_id)), str(int(tab_id)))
     _cache["tabs"] = None
 
@@ -220,6 +309,20 @@ def find_tab(url, tabs=None):
 def open_or_focus(url):
     if not url.lower().startswith(("http://", "https://")):
         raise ValueError("only http(s) links")
+    if bridge.connected():
+        t = find_tab(url)
+        if t:
+            focus(t["window"], t["tab"])
+            return "focused"
+        # Open it in a Chrome profile that belongs to the current space (work links in the work profile).
+        import common
+        space = common.current_space()
+        conns = bridge.snapshot()
+        profs = {p["email"].lower(): d for d, p in profiles().items() if p["email"]}
+        pick = next((cid for cid, email, _ in conns
+                     if common.space_of_profile(profs.get((email or "").lower()), None) == space), conns[0][0])
+        bridge.send(pick, {"type": "open", "url": url})
+        return "opened"
     if WINDOWS:
         webbrowser.open(url)
         return "opened"

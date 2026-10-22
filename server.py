@@ -8,8 +8,11 @@ POST /api/event (for agents that don't write transcripts, e.g. Claude in Chrome)
 Run:  python3 server.py          then open http://127.0.0.1:4317
 Only stdlib, binds to localhost only.
 """
+import base64
 import glob
+import hashlib
 import json
+import struct
 import os
 import re
 import sys
@@ -584,10 +587,73 @@ class Handler(BaseHTTPRequestHandler):
         self._send(403, {"error": "bad host"})
         return False
 
+    # ---- Live connection for the Agent Board Chrome extension (WebSocket, stdlib only) ----
+    def _ws_tabs(self):
+        if self.headers.get("Origin") != f"chrome-extension://{chrome.EXTENSION_ID}":
+            return self._send(403, {"error": "only the Agent Board extension may connect"})
+        key = self.headers.get("Sec-WebSocket-Key", "")
+        accept = base64.b64encode(hashlib.sha1((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest()).decode()
+        self.protocol_version = "HTTP/1.1"   # browsers only accept "HTTP/1.1 101" for WebSockets
+        self.send_response(101)
+        self.send_header("Upgrade", "websocket")
+        self.send_header("Connection", "Upgrade")
+        self.send_header("Sec-WebSocket-Accept", accept)
+        self.end_headers()
+        self.close_connection = True
+        out_lock = threading.Lock()
+
+        def send_frame(opcode, data):
+            n = len(data)
+            if n < 126:
+                head = bytes([0x80 | opcode, n])
+            elif n < 65536:
+                head = bytes([0x80 | opcode, 126]) + struct.pack(">H", n)
+            else:
+                head = bytes([0x80 | opcode, 127]) + struct.pack(">Q", n)
+            with out_lock:
+                self.wfile.write(head + data)
+                self.wfile.flush()
+
+        cid = chrome.bridge.add(lambda msg: send_frame(1, json.dumps(msg).encode()))
+        buf = b""
+        try:
+            while True:
+                b1, b2 = self.rfile.read(2)
+                opcode, n = b1 & 0x0F, b2 & 0x7F
+                if n == 126:
+                    n = struct.unpack(">H", self.rfile.read(2))[0]
+                elif n == 127:
+                    n = struct.unpack(">Q", self.rfile.read(8))[0]
+                if n > 16 * 1024 * 1024:
+                    break
+                mask = self.rfile.read(4) if b2 & 0x80 else b"\0\0\0\0"
+                data = bytes(c ^ mask[i % 4] for i, c in enumerate(self.rfile.read(n)))
+                if opcode == 8:
+                    break
+                if opcode == 9:
+                    send_frame(10, data)
+                    continue
+                if opcode in (0, 1):
+                    buf += data
+                    if not b1 & 0x80:
+                        continue   # wait for the rest of a fragmented message
+                    msg, buf = json.loads(buf.decode("utf-8", "replace") or "{}"), b""
+                    if msg.get("type") == "hello":
+                        chrome.bridge.update(cid, email=str(msg.get("email") or ""))
+                    elif msg.get("type") == "tabs":
+                        tabs = [t for t in msg.get("tabs") or [] if isinstance(t, dict)][:2000]
+                        chrome.bridge.update(cid, email=str(msg.get("email") or ""), tabs=tabs)
+        except (ValueError, OSError, struct.error):
+            pass
+        finally:
+            chrome.bridge.remove(cid)
+
     def do_GET(self):
         if not self._host_ok():
             return
         u = urlparse(self.path)
+        if u.path == "/ws/tabs" and self.headers.get("Upgrade", "").lower() == "websocket":
+            return self._ws_tabs()
         if u.path in ("/", "/index.html"):
             with open(os.path.join(HERE, "index.html"), "rb") as fh:
                 return self._send(200, fh.read(), "text/html")
