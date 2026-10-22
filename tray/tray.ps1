@@ -62,6 +62,15 @@ $Icons = @{
 
 $script:summary = $null
 $script:frame = 0
+$script:labels = $null   # labels in the board's language (English / Korean), kept while offline
+
+# Label from the board (so the tray follows the language setting), with {n} filled in; English fallback.
+function L([string]$Key, [string]$Fallback, $N = $null) {
+    $text = $Fallback
+    if ($script:labels -and $script:labels.$Key) { $text = [string]$script:labels.$Key }
+    if ($null -ne $N) { $text = $text.Replace('{n}', [string]$N) }
+    return $text
+}
 
 $tray = New-Object System.Windows.Forms.NotifyIcon
 $tray.Icon = $Icons['offline0']
@@ -85,10 +94,10 @@ function Set-Tip([string]$Text) {
 function Update-Look {
     $m = Get-Mood
     switch ($m) {
-        'need'    { $tray.Icon = $Icons["need$($script:frame)"]; Set-Tip ("Agent Board - " + @($script:summary.need).Count + " need you") }
-        'work'    { $tray.Icon = $Icons["work$($script:frame)"]; Set-Tip ("Agent Board - " + @($script:summary.work).Count + " working") }
-        'quiet'   { $tray.Icon = $Icons['quiet0']; Set-Tip 'Agent Board - all quiet' }
-        default   { $tray.Icon = $Icons['offline0']; Set-Tip "Agent Board isn't running" }
+        'need'    { $tray.Icon = $Icons["need$($script:frame)"]; Set-Tip ("Agent Board - " + (L 'n_need_you' '{n} need you' @($script:summary.need).Count)) }
+        'work'    { $tray.Icon = $Icons["work$($script:frame)"]; Set-Tip ("Agent Board - " + (L 'n_working' '{n} working' @($script:summary.work).Count)) }
+        'quiet'   { $tray.Icon = $Icons['quiet0']; Set-Tip ("Agent Board - " + (L 'all_quiet' 'all quiet')) }
+        default   { $tray.Icon = $Icons['offline0']; Set-Tip (L 'not_running' "Agent Board isn't running") }
     }
 }
 
@@ -111,7 +120,10 @@ function Open-Board([string]$Hash) {
 }
 
 function Refresh {
-    try { $script:summary = Invoke-RestMethod -Uri ($Board + 'api/summary') -TimeoutSec 3 }
+    try {
+        $script:summary = Invoke-RestMethod -Uri ($Board + 'api/summary') -TimeoutSec 3
+        if ($script:summary.labels) { $script:labels = $script:summary.labels }
+    }
     catch { $script:summary = $null }
     Update-Look
 }
@@ -142,11 +154,11 @@ $menu.Add_Opening({
     $menu.Items.Clear()
     $s = $script:summary
     if ($null -eq $s) {
-        [void](Add-Item "Agent Board isn't running" $false)
+        [void](Add-Item (L 'not_running' "Agent Board isn't running") $false)
     } else {
         $personal = ($s.space.space -eq 'personal')
-        [void](Add-Item ($(if ($personal) { 'Personal space' } else { 'Work space' })) $false)
-        $switch = Add-Item ($(if ($personal) { 'Switch to Work' } else { 'Switch to Personal' })) $true
+        [void](Add-Item ($(if ($personal) { L 'personal_space' 'Personal space' } else { L 'work_space' 'Work space' })) $false)
+        $switch = Add-Item ($(if ($personal) { L 'switch_to_work' 'Switch to Work' } else { L 'switch_to_personal' 'Switch to Personal' })) $true
         $target = if ($personal) { 'work' } else { 'personal' }
         if ($s.space.auto -eq $target) { $target = 'auto' }   # going back to the time-based space
         $switch.Tag = $target
@@ -159,25 +171,25 @@ $menu.Add_Opening({
             Refresh
         })
         [void]$menu.Items.Add('-')
-        Add-Agents 'Needs you' $s.need
-        Add-Agents 'Working' $s.work
+        Add-Agents (L 'needs_you_list' 'Needs you') $s.need
+        Add-Agents (L 'working_list' 'Working') $s.work
         $line = @()
-        if ($s.done -gt 0) { $line += "$($s.done) done" }
-        if ($s.tired -gt 0) { $line += "$($s.tired) to restart" }
-        if ($s.asleep -gt 0) { $line += "$($s.asleep) asleep" }
+        if ($s.done -gt 0) { $line += (L 'n_done' '{n} done' $s.done) }
+        if ($s.tired -gt 0) { $line += (L 'n_restart' '{n} to restart' $s.tired) }
+        if ($s.asleep -gt 0) { $line += (L 'n_asleep' '{n} asleep' $s.asleep) }
         if ($line.Count -gt 0) { [void](Add-Item ($line -join ' | ') $false) }
         foreach ($p in @($s.plan)) {
             if ($null -eq $p) { continue }
             $who = ([string]$p.account).Split('@')[0]
             $five = if ($null -ne $p.five) { "$($p.five)%" } else { '-' }
             $week = if ($null -ne $p.week) { "$($p.week)%" } else { '-' }
-            [void](Add-Item "${who}: 5h $five | week $week" $false)
+            [void](Add-Item ("${who}: " + (L 'five_hour' '5h') + " $five | " + (L 'week' 'week') + " $week") $false)
         }
     }
     [void]$menu.Items.Add('-')
-    $open = Add-Item 'Open Agent Board' $true
+    $open = Add-Item (L 'open_board' 'Open Agent Board') $true
     $open.Add_Click({ Open-Board '' })
-    $quit = Add-Item 'Quit tray buddy' $true
+    $quit = Add-Item (L 'quit' 'Quit') $true
     $quit.Add_Click({
         $tray.Visible = $false
         $tray.Dispose()

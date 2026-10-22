@@ -12,6 +12,14 @@ computer at http://127.0.0.1:4317. These are your instructions when working in t
   `config.json` = their answers, `data/` = logs, trash, usage. Never copy these into the project or commit them.
 - Temporary files you create (e.g. an answers file) go in a temp/scratch folder, never in this folder.
 
+## Language
+
+- Talk to the user in **their** language. If they write in Korean, answer in Korean and point them to
+  [README.ko.md](README.ko.md).
+- Agent Board itself supports English and Korean (board, notifications, menu-bar/tray buddy, setup).
+  During setup include `"language": "ko"` (or `"en"`, or `"auto"` = follow the computer) in the answers file.
+  Later they can switch in the board: **More ⋯ → Language / 더보기 ⋯ → 언어**.
+
 ## When the user asks to install / set up Agent Board
 
 Use `python3` on macOS and `py` on Windows (if `py` is missing, try `python`).
@@ -27,7 +35,8 @@ Use `python3` on macOS and `py` on Windows (if `py` is missing, try `python`).
    ```
    It prints JSON: `os`, `projects` (folders they've used Claude Code in), `chrome_profiles`
    (`dir`, `name`, `email`), `claude_account`, `current_answers`, `chrome_extension_steps`.
-3. **Ask the user** (use AskUserQuestion; short questions, sensible defaults, never guess):
+3. **Ask the user** (use AskUserQuestion, in their language; short questions, sensible defaults, never guess):
+   - **Language** for the board and notifications: English or 한국어 (default: the language they write in).
    - **Personal hours** — default 20:00–08:00. During them the board shows the Personal space and personal
      notifications can arrive; the rest of the day is Work and personal projects are hidden.
    - **Each project folder** from `projects`: Work, Personal, or Skip (skipped ones show as "Unsorted";
@@ -38,6 +47,7 @@ Use `python3` on macOS and `py` on Windows (if `py` is missing, try `python`).
 4. **Write the answers** to a temp file outside this folder, in this format (all keys optional):
    ```json
    {
+     "language": "ko",
      "personal_hours": {"from": "20:00", "to": "08:00"},
      "projects": {"/Users/kim/code/acme": "work", "/Users/kim/code/blog": "personal"},
      "chrome_profiles": {"Default": "personal", "Profile 1": "work"},

@@ -25,6 +25,7 @@ Everything runs only on this computer. Nothing is sent anywhere.
 """
 import glob
 import json
+import re
 import os
 import shutil
 import subprocess
@@ -65,7 +66,94 @@ if WINDOWS:
 B, D, G, Y, R, X = "\033[1m", "\033[2m", "\033[32m", "\033[33m", "\033[31m", "\033[0m"
 
 
-def say(msg=""): print(msg)
+
+# ---------------------------------------------------------------- Korean
+# Setup's messages pass through tr(); when the user picks 한국어, these patterns translate them.
+KO = [(re.compile(p), r) for p, r in [
+    (r"Agent Board setup", "Agent Board 설정"),
+    (r"\(dry run: nothing will change\)", "(미리보기: 아무것도 바뀌지 않아요)"),
+    (r"A few questions, then everything installs\. Press Enter to accept the \[default\]\.", "몇 가지 질문 후 모두 설치돼요. Enter를 누르면 [기본값]을 써요."),
+    (r"Personal hours", "개인 시간"),
+    (r"During these hours the board shows your Personal space and personal notifications can arrive\.", "이 시간에는 보드가 개인 공간을 보여 주고 개인 알림이 와요."),
+    (r"The rest of the day is Work: personal projects stay hidden from the screen\.", "나머지 시간은 업무 시간이라 개인 프로젝트가 화면에 보이지 않아요."),
+    (r"Personal time starts at", "개인 시간 시작"), (r"Personal time ends at", "개인 시간 끝"),
+    (r"Personal (\S+)–(\S+), Work the rest of the day", r"개인 \1–\2, 나머지는 업무"),
+    (r"Your project folders", "프로젝트 폴더"),
+    (r"Folders you've used Claude Code in\. Subfolders follow their parent\.", "Claude Code를 쓴 폴더들이에요. 하위 폴더는 상위 폴더를 따라가요."),
+    (r'New projects later: Claude asks you "work or personal\?" the first time you open them\.', '나중에 새 프로젝트를 열면 Claude가 처음에 "업무인가요, 개인인가요?"라고 물어봐요.'),
+    (r"\(w = work, p = personal, s = skip\)", "(w = 업무, p = 개인, s = 건너뛰기)"),
+    (r"Please type w, p or s\.", "w, p, s 중 하나를 입력하세요."),
+    (r"No Claude Code projects found yet\. That's fine: Claude will ask when you start one\.", "아직 Claude Code 프로젝트가 없어요. 괜찮아요. 새로 시작하면 Claude가 물어봐요."),
+    (r"(\d+) work profile\(s\), (\d+) personal", r"업무 프로필 \1개, 개인 \2개"),
+    (r"(\d+) work, (\d+) personal", r"업무 \1개, 개인 \2개"),
+    (r"Chrome profiles \(Google accounts\)", "Chrome 프로필 (Google 계정)"),
+    (r"Tabs from a Work profile only show in Work; anything not marked Work stays Personal\.", "업무 프로필의 탭은 업무 공간에만 보여요. 업무로 표시하지 않은 프로필은 개인이에요."),
+    (r"Google Chrome not found\. Skipping \(the Chrome tab finder needs Chrome\)\.", "Google Chrome이 없어서 건너뛰어요 (탭 찾기는 Chrome이 필요해요)."),
+    (r"Do you use Claude \(extension or claude\.ai\) in (.+)\? \(y/n\)", r"\1에서 Claude(확장 프로그램 또는 claude.ai)를 쓰나요? (y/n)"),
+    (r"Claude accounts", "Claude 계정"),
+    (r"Claude Code is signed in as (.+)", r"Claude Code 로그인 계정: \1"),
+    (r"Claude Code isn't signed in yet\. Run setup again after your first Claude Code session\.", "Claude Code에 아직 로그인하지 않았어요. 처음 Claude Code를 쓴 뒤 설정을 다시 실행하세요."),
+    (r"Saved your answers in (.+) \(edit it anytime, or run setup again\)", r"답변을 \1에 저장했어요 (언제든 수정하거나 설정을 다시 실행하세요)"),
+    (r"Saved answers in (.+)", r"답변을 \1에 저장했어요"),
+    (r"Claude Code hooks and status line", "Claude Code 연결 (훅과 상태 표시줄)"),
+    (r"Hooks added to (.+) \(backup saved next to it\)", r"\1에 연결을 추가했어요 (옆에 백업도 저장했어요)"),
+    (r"Open Claude Code sessions pick this up after a restart", "열려 있는 Claude Code 세션은 다시 시작해야 적용돼요"),
+    (r"You already have a status line \((.*)\)\. Replace it\? \(y/n\)", r"이미 상태 표시줄이 있어요 (\1). 바꿀까요? (y/n)"),
+    (r"Kept your status line\. Plan usage \(5-hour / weekly %\) won't show on the board\.", "기존 상태 표시줄을 유지했어요. 보드에 요금제 사용량(5시간/주간 %)은 안 보여요."),
+    (r"6\. Apps", "6. 앱"),
+    (r" → work\b", " → 업무"), (r" → personal\b", " → 개인"),
+    (r"Windows: notifications use Windows' own notification center, so nothing to build", "Windows: 알림은 Windows 알림 센터를 써서 따로 만들 게 없어요"),
+    (r"The tray buddy starts in the next step; the Chrome tab finder is the last step", "트레이 버디는 다음 단계에서 시작되고, Chrome 탭 찾기는 마지막 단계예요"),
+    (r"Xcode command line tools not found, so the app and menu-bar buddy were skipped\.", "Xcode 명령줄 도구가 없어서 앱과 메뉴 막대 버디는 건너뛰었어요."),
+    (r"Install them with:  xcode-select --install   then run setup again\.", "설치:  xcode-select --install   그다음 설정을 다시 실행하세요."),
+    (r"The board still works in your browser at (\S+)", r"보드는 브라우저에서 \1 로 계속 쓸 수 있어요"),
+    (r"Built Agent Board app \(board window \+ notifications\)", "Agent Board 앱을 만들었어요 (보드 창 + 알림)"),
+    (r"Built Menu-bar buddy", "메뉴 막대 버디를 만들었어요"),
+    (r"Start at login", "로그인할 때 자동 시작"),
+    (r"Board server starts at login", "보드 서버가 로그인할 때 시작돼요"),
+    (r"Menu-bar buddy starts at login", "메뉴 막대 버디가 로그인할 때 시작돼요"),
+    (r"Board server and tray buddy start when you sign in to Windows", "Windows에 로그인하면 보드 서버와 트레이 버디가 시작돼요"),
+    (r"Board server and tray buddy started \(tray: bottom-right, next to the clock\)", "보드 서버와 트레이 버디를 시작했어요 (트레이: 오른쪽 아래 시계 옆)"),
+    (r"Added “Agent Board” to your Desktop", "바탕화면에 “Agent Board”를 추가했어요"),
+    (r"Chrome tab finder \(optional, 3 clicks\)", "Chrome 탭 찾기 (선택, 클릭 3번)"),
+    (r"Lets the board find and switch to your Chrome tabs\. It only talks to this computer\.", "보드가 Chrome 탭을 찾고 이동할 수 있게 해요. 이 컴퓨터 안에서만 통신해요."),
+    (r"Google Chrome not found, skipping\.", "Google Chrome이 없어서 건너뛰어요."),
+    (r"In Chrome, open  chrome://extensions", "Chrome에서  chrome://extensions  를 여세요"),
+    (r"Turn on  Developer mode  \(top-right switch\)", "오른쪽 위  개발자 모드  를 켜세요"),
+    (r"Click  Load unpacked  and choose this folder:  (.+)", r"압축해제된 확장 프로그램을 로드합니다  를 누르고 이 폴더를 고르세요:  \1"),
+    (r"Repeat in each Chrome profile you use \(each Google account has its own extensions\)", "쓰는 Chrome 프로필마다 반복하세요 (Google 계정마다 확장 프로그램이 따로 있어요)"),
+    (r"Open Chrome's extensions page and the folder now\? \(y/n\)", "지금 Chrome 확장 프로그램 페이지와 폴더를 열까요? (y/n)"),
+    (r"Opened\. When it's loaded, the board's Tabs button shows your tabs\.", "열었어요. 추가가 끝나면 보드의 탭 버튼에서 탭이 보여요."),
+    (r"Done\.(.*) Open (.*)Agent Board(.*) on your Desktop, or (\S+)", r"완료!\1 바탕화면에서 \2Agent Board\3를 열거나 \4 로 접속하세요"),
+    (r"Notifications show up from Windows PowerShell; turn them on in Settings → System → Notifications if needed\.", "알림은 Windows PowerShell 이름으로 와요. 필요하면 설정 → 시스템 → 알림에서 켜세요."),
+    (r"Restart open Claude Code sessions to load the hooks\.", "열려 있는 Claude Code 세션을 다시 시작해 주세요."),
+    (r"macOS may ask to allow notifications from Agent Board, and to let python3 control Google Chrome", "macOS가 Agent Board 알림 허용과 python3의 Google Chrome 제어를 물어볼 수 있어요"),
+    (r"\(for the tab finder\)\. Both are optional\.", "(탭 찾기용). 둘 다 선택이에요."),
+    (r"Claude Code doesn't seem to be installed yet \(no (.+)\)\. Install it first, then run setup again\.", r"Claude Code가 아직 설치되지 않은 것 같아요 (\1 없음). 먼저 설치한 뒤 설정을 다시 실행하세요."),
+]]
+LANG = "en"
+
+
+def tr(text):
+    if LANG != "ko":
+        return text
+    for pat, rep in KO:
+        text = pat.sub(rep, text)
+    return text
+
+
+def choose_language(cfg):
+    """First question: English or 한국어 (default: the computer's language, or the saved choice)."""
+    global LANG
+    import i18n
+    saved = cfg.get("language")
+    default = saved if saved in ("en", "ko") else i18n.system_language()
+    a = ask(f"Language / 언어  {D}(1 = English, 2 = 한국어){X}", "2" if default == "ko" else "1")
+    LANG = "ko" if a.strip() in ("2", "ko", "한국어", "korean") else "en"
+    cfg["language"] = LANG
+
+
+def say(msg=""): print(tr(msg))
 def step(n, title): say(f"\n{B}{n}. {title}{X}")
 def ok(msg): say(f"   {G}✓{X} {msg}")
 def warn(msg): say(f"   {Y}!{X} {msg}")
@@ -81,7 +169,7 @@ def ask(question, default=""):
         return default
     hint = f" {D}[{default}]{X}" if default else ""
     try:
-        a = input(f"   {question}{hint} ").strip()
+        a = input(f"   {tr(question)}{hint} ").strip()
     except EOFError:
         a = ""
     return a or default
@@ -169,6 +257,7 @@ def configure():
     fresh = not os.path.exists(CONFIG)
     if fresh:   # start from a clean slate, not the example's placeholder folders and emails
         cfg.update(projects={}, chrome_profiles={}, account_spaces={}, claude_accounts=[], claude_in_chrome={})
+    choose_language(cfg)
 
     step(1, "Personal hours")
     say(f"   {D}During these hours the board shows your Personal space and personal notifications can arrive.")
@@ -277,6 +366,10 @@ def configure_from(path):
         if v not in ("work", "personal"):
             raise SystemExit(f"Answer must be 'work' or 'personal', got {v!r}")
         return v
+    if a.get("language") in ("en", "ko", "auto"):
+        cfg["language"] = a["language"]
+        global LANG
+        LANG = "ko" if a["language"] == "ko" else "en"
     if "personal_hours" in a:
         cfg["personal_notify_hours"] = {"from": a["personal_hours"]["from"], "to": a["personal_hours"]["to"]}
     if "projects" in a:
@@ -362,7 +455,7 @@ def build_apps():
     step(6, "Apps")
     if WINDOWS:
         ok("Windows: notifications use Windows' own notification center, so nothing to build")
-        warn("The Chrome tab finder and menu-bar buddy are macOS-only for now")
+        warn("The tray buddy starts in the next step; the Chrome tab finder is the last step")
         return False
     if not shutil.which("swiftc"):
         warn("Xcode command line tools not found, so the app and menu-bar buddy were skipped.")

@@ -1,5 +1,7 @@
 # Agent Board
 
+**English** · [한국어](README.ko.md)
+
 **See all your Claude agents at a glance.** Every Claude Code session (terminal, desktop app, IDE) shows up as a
 little animated character: waving = it needs you, typing = working, ✓ = done, sweating = it's grown too big and
 should be restarted. Work and personal projects are kept apart, so coworkers never see your personal ones.

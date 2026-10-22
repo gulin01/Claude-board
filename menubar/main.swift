@@ -7,13 +7,21 @@ import Cocoa
 struct Item: Decodable { let id: String; let title: String; let project: String }
 struct Plan: Decodable { let account: String; let five: Int?; let week: Int? }
 struct Space: Decodable { let space: String; let auto: String; let manual: Bool; let until: Double }
-struct Summary: Decodable { let need: [Item]; let work: [Item]; let done: Int; let tired: Int; let asleep: Int; let plan: [Plan]; let space: Space }
+struct Summary: Decodable { let need: [Item]; let work: [Item]; let done: Int; let tired: Int; let asleep: Int; let plan: [Plan]; let space: Space; let labels: [String: String]? }
 
 let board = "http://127.0.0.1:4317/"
 
 final class App: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var item: NSStatusItem!
     var summary: Summary?
+    var labels: [String: String] = [:]   // in the board's language (English / 한국어), kept while offline
+
+    /// Label from the board, with {n} filled in; English fallback.
+    func L(_ key: String, _ fallback: String, n: Int? = nil) -> String {
+        var s = labels[key] ?? fallback
+        if let n = n { s = s.replacingOccurrences(of: "{n}", with: String(n)) }
+        return s
+    }
     var offline = false
     var frame = 0
 
@@ -37,7 +45,7 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let s = data.flatMap { try? JSONDecoder().decode(Summary.self, from: $0) }
             DispatchQueue.main.async {
                 self.offline = (s == nil)
-                if let s = s { self.summary = s }
+                if let s = s { self.summary = s; if let l = s.labels { self.labels = l } }
                 self.redraw()
             }
         }.resume()
@@ -64,7 +72,7 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate {
         case .work: item.button?.title = " \(summary!.work.count)"
         default: item.button?.title = ""
         }
-        item.button?.toolTip = m == .offline ? "Agent Board isn't running" : "Agent Board"
+        item.button?.toolTip = m == .offline ? L("not_running", "Agent Board isn't running") : "Agent Board"
     }
 
     func buddy(_ m: Mood, frame: Int) -> NSImage {
@@ -112,9 +120,9 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
         guard let s = summary, !offline else {
-            menu.addItem(disabled("Agent Board isn't running"))
+            menu.addItem(disabled(L("not_running", "Agent Board isn't running")))
             menu.addItem(.separator())
-            menu.addItem(action("Quit", #selector(quit), key: "q"))
+            menu.addItem(action(L("quit", "Quit"), #selector(quit), key: "q"))
             return
         }
         func section(_ title: String, _ items: [Item]) {
@@ -130,25 +138,25 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         // Only the current space is listed; the other one never shows here.
         let personal = s.space.space == "personal"
-        menu.addItem(disabled(personal ? "Personal space" : "Work space"))
-        let sw = action(personal ? "Switch to Work" : "Switch to Personal", #selector(toggleSpace))
+        menu.addItem(disabled(personal ? L("personal_space", "Personal space") : L("work_space", "Work space")))
+        let sw = action(personal ? L("switch_to_work", "Switch to Work") : L("switch_to_personal", "Switch to Personal"), #selector(toggleSpace))
         sw.representedObject = personal ? (s.space.auto == "work" ? "auto" : "work") : (s.space.auto == "personal" ? "auto" : "personal")
         menu.addItem(sw)
         menu.addItem(.separator())
-        section("● Needs you (\(s.need.count))", s.need)
-        section("● Working (\(s.work.count))", s.work)
+        section("● \(L("needs_you_list", "Needs you")) (\(s.need.count))", s.need)
+        section("● \(L("working_list", "Working")) (\(s.work.count))", s.work)
         var line = [String]()
-        if s.done > 0 { line.append("✓ \(s.done) done") }
-        if s.tired > 0 { line.append("\(s.tired) to restart") }
-        if s.asleep > 0 { line.append("\(s.asleep) asleep") }
+        if s.done > 0 { line.append("✓ " + L("n_done", "{n} done", n: s.done)) }
+        if s.tired > 0 { line.append(L("n_restart", "{n} to restart", n: s.tired)) }
+        if s.asleep > 0 { line.append(L("n_asleep", "{n} asleep", n: s.asleep)) }
         if !line.isEmpty { menu.addItem(disabled(line.joined(separator: " · "))) }
         for p in s.plan {
             let who = p.account.split(separator: "@").first.map(String.init) ?? p.account
-            menu.addItem(disabled("\(who): 5h \(p.five.map { "\($0)%" } ?? "–") · week \(p.week.map { "\($0)%" } ?? "–")"))
+            menu.addItem(disabled("\(who): \(L("five_hour", "5h")) \(p.five.map { "\($0)%" } ?? "–") · \(L("week", "week")) \(p.week.map { "\($0)%" } ?? "–")"))
         }
         menu.addItem(.separator())
-        menu.addItem(action("Open Agent Board", #selector(openBoard), key: "o"))
-        menu.addItem(action("Quit", #selector(quit), key: "q"))
+        menu.addItem(action(L("open_board", "Open Agent Board"), #selector(openBoard), key: "o"))
+        menu.addItem(action(L("quit", "Quit"), #selector(quit), key: "q"))
     }
 
     func disabled(_ t: String) -> NSMenuItem { let m = NSMenuItem(title: t, action: nil, keyEquivalent: ""); m.isEnabled = false; return m }
